@@ -12,10 +12,23 @@ app.get('/', (req, res) => {
 
 app.get('/studentInfo', (req, res) => {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-	console.log(req);
-	return res.sendFile(path.join(__dirname, 'studentInfo.csv'));
+	return res.sendFile(path.join(__dirname, 'studentInfo_new.csv'));
+});
+
+app.get('/verification', (req, res) => {
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+	console.log(req.query.code);
+	if(req.query.code == 'sms5913498123'){
+		return res.sendFile(path.join(__dirname, 'studentInfo_new.csv'));
+	}
+	else{
+		res.status(403);
+		return res.send('Wrong verification code.');
+	}
 });
 
 console.log('Start listening on', hostname + ':' + port);
-console.log();
+
+app.use(express.static(path.join(__dirname, 'js')));
+
 app.listen(port, hostname);

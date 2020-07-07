@@ -49,9 +49,21 @@
 			min-width: 20rem;
 		}
 		
+		.card > ul > button{
+		}
+		
 		#search-dropdown {
 			width: inherit;
 			overflow-x: hidden;
+		}
+		
+		#btn-next {
+			border-radius: 0 0 0.25rem 0.25rem;
+		}
+		
+		#msg-wrong {
+			color: red;
+			opacity: 0;
 		}
 		
 		.dropdown-item > p {
@@ -114,15 +126,15 @@
 
  <body>
 	<div>
-		<nav class="navbar navbar-expand-lg navbar-light bg-light" style="z-index:100000">
-			<a class="navbar-brand">ASD</a>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light" style="z-index:100">
+			<a class="navbar-brand">Where We Go for 2020</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarToggler">
 				<ul class="navbar-nav mr-auto mt-2 mt-md-0">
 					<li class="nav-item active">
-						<a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+						<a class="nav-link" href="#">Map <span class="sr-only">(current)</span></a>
 					</li>
 				   
 				</ul>
@@ -141,9 +153,26 @@
 		</nav>
 	</div>
 	<div id='map'></div>
+	<div id="verification" class="modal" tabindex="-1" role="dialog">
+	  <div class="modal-dialog modal-sm">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title">身份验证</h5>
+		  </div>
+		  <div class="modal-body">
+			<form id="form-verification" class="input-group">
+				<input type="password" class="form-control" placeholder="输入访问密码"></input>
+				<div class="input-group-append">
+					<button type="submit" class="btn btn-primary" onclick="return void 0;">验证</button>
+				</div>
+			</form>
+		  </div>
+		</div>
+	  </div>
+	</div>
 
+	<script src="main.js"></script>
     <script>
-
         var transformRequest = (url, resourceType) => {
             var isMapboxRequest =
                 url.slice(8, 22) === "api.mapbox.com" ||
@@ -158,26 +187,50 @@
         //YOUR TURN: add your Mapbox token
         mapboxgl.accessToken = 'pk.eyJ1IjoiYWNraW5kbGUzIiwiYSI6ImNrYzYzcWFnOTA5bjQycnRlY2t4OWxlMWUifQ.a3wwi4cHq1sHakuoT9Bo0w';
 		
-		//Mapbox token
-        var map = new mapboxgl.Map({
-            container: 'map', // container id
-            style: 'mapbox://styles/mapbox/streets-v11', //stylesheet location
-            center: [-122.411464, 37.7852299], // starting position
-            zoom: 4,// starting zoom
-            transformRequest: transformRequest
-        });
-		
+		var map;
 		var studentInfo = [];
-		var popup = new mapboxgl.Popup({ closeOnMove: true })
+		var popup = new mapboxgl.Popup({ closeOnMove: true , closeOnClick: false})
 		
         $(document).ready(function () {
-            $.ajax({
-                type: "GET",
-                //YOUR TURN: Replace with csv export link
-                url: 'studentInfo',
-                dataType: "text",
-                success: function (csvData) { makeGeoJSON(csvData); }
-            });
+		
+			$("#verification").modal('show');
+			
+			$('#form-verification').submit(function(e){
+				e.preventDefault();
+				const param = {code:$('#form-verification > input').val().trim()};
+				
+				if(param['code'] != ""){
+					$.ajax({
+						type: "GET",
+						url: 'verification',
+						dataType: "text",
+						data: param,
+						success: function (csvData) { 
+							initialize(csvData); 
+							$("#verification").modal('hide');
+						},
+						error: function (res) {
+							$('#form-verification > input').val('');
+							$('#msg-wrong').remove();
+							$('#verification').find('.modal-body').prepend('<p id="msg-wrong">访问密码错误</p>');
+							$('#msg-wrong').animate({'opacity':1},500)
+						}
+					});
+				}
+			});
+			
+			function initialize(csvData){
+				//Mapbox token
+				map = new mapboxgl.Map({
+					container: 'map', // container id
+					style: 'mapbox://styles/mapbox/streets-v11', //stylesheet location
+					center: [114.121677, 22.551557], // starting position
+					zoom: 4,// starting zoom
+					transformRequest: transformRequest
+				});
+				makeGeoJSON(csvData);
+			}
+			
             function makeGeoJSON(csvData) {
                 csv2geojson.csv2geojson(csvData, {
                     latfield: 'Latitude',
@@ -185,7 +238,7 @@
                     delimiter: ','
                 }, function (err, data) {
                     map.on('load', function () {
-
+						console.log(data);
                         //Add the the layer to the map
                         map.addLayer({
                             'id': 'csvData',
@@ -207,9 +260,9 @@
 							studentInfo.push(feature);
 						});
 						
-						map.on('mouseover', 'csvData', function(e) {createPopup(e.features[0]);});
+						map.on('mouseover', 'csvData', function(e) {createPopup(e.features);});
 						
-						map.on('touchend', 'csvData', function(e) {createPopup(e.features[0]);});
+						map.on('touchend', 'csvData', function(e) {createPopup(e.features);});
 
                         // Change the cursor to a pointer when the mouse is over the places layer.
                         map.on('mouseenter', 'csvData', function () {
@@ -231,30 +284,60 @@
             };
 		});
 		
-		function createPopup(feature) {
-			var coordinates = feature.geometry.coordinates.slice();
+		// Create a popup on the destinated point
+		function createPopup(features) {
+			var coordinates = features[0].geometry.coordinates.slice();
+			var i = 0;
+			
+			temp = '<div id="popup" class="card">' 
+							+ '<div class="card-body">'
+								+ '<h5 class="card-title"></h5>'
+								+ '<ul style="list-style:none; padding-left:0">'
+									+ '<li>' + '<i class="fa fa-university"></i><span></span></li>'
+									+ '<li>' + '<i class="fa fa-book"></i><span></span></li>'
+									+ '<li>' + '<i class="fa fa-phone"></i><span></span></li>'
+									+ '<li>' + '<i class="fa fa-wechat"></i><span></span></li>'
+									+ '<li>' + '<i class="fa fa-home"></i><span></span></li>'
+								+ '</ul>'
+							+ '</div>'
+						+ '</div>';
 			
 			//set popup text
 			//You can adjust the values of the popup to match the headers of your CSV.
 			// For example: e.features[0].properties.Name is retrieving information from the field Name in the original CSV.
-			var description = 
-			'<div class="card">' 
-				+ '<div class="card-body">'
-					+ '<h5 class="card-title">' + feature.properties.Name + '</h5>'
-					+ '<ul style="list-style:none; padding-left:0">'
-						+ '<li>' + '<i class="fa fa-university"></i>'+ feature.properties.School + '</li>'
-						+ '<li>' + '<i class="fa fa-book"></i>' + feature.properties.Major + '</li>'
-						+ '<li>' + '<i class="fa fa-phone"></i>' + feature.properties.Phone + '</li>'
-						+ '<li>' + '<i class="fa fa-wechat"></i>' + feature.properties.WeChat + '</li>'
-						+ '<li>' + '<i class="fa fa-home"></i>'  + '高三&nbsp(' + feature.properties.Class + ')&nbsp班' + '</li>' 
-					+ '</ul>'
-				+ '</div>' 
-			+ '</div>';
-				
+			function formatDescription(element, feature){
+				element.find('h5').text(FeatureText.name(feature));
+				element.find('span').get(0).innerHTML = FeatureText.school(feature);
+				element.find('span').get(1).innerHTML = FeatureText.major(feature);
+				element.find('span').get(2).innerHTML = FeatureText.phone(feature);
+				element.find('span').get(3).innerHTML = FeatureText.wechat(feature);
+				element.find('span').get(4).innerHTML = FeatureText.class_(feature);
+				element.find('li').each((i, e) => {
+					if($(e).find('span').text().trim() == ''){
+						$(e).hide();
+					} else {
+						$(e).show();
+					}
+				});
+				return element;
+			}
+			
+			var description = formatDescription($(temp), features[i++])[0].outerHTML;
+			
 			//add Popup to map
 			popup.setLngLat(coordinates)
 				.setHTML(description)
 				.addTo(map);
+			
+			// When there're multiple people at the same point
+			if(features.length > 1){
+				$('#popup').append('<button id="btn-next" class="btn btn-primary">' + FeatureText.next() + ' <span>' + i + '/' + features.length + '</span><i class="fa fa-angle-right"></i>' + '</button>');
+				$('#btn-next').click(e => {
+					if(i == features.length) i = 0;
+					$("#popup").find('span').get(5).innerHTML = (i + 1) + '/' + features.length;
+					formatDescription($('#popup'), features[i++]);
+				});
+			}
 		}
 		
 		$("#form-search > input").on('keyup', function(e){
@@ -272,28 +355,34 @@
 			}
 		});
 		
+		// Update the dropdown list according to the keyword
 		function updateSearchDropDown(){
 			const keyword = $('#form-search > input')[0].value;
 			
 			if(keyword != ''){
+				// Generate the search results and hide the dropdown list in case there's no matches
 				results = searchByKeyword(keyword)
 				if(results.length == 0) {
 					$('#search-dropdown').fadeOut();
 					return;
 				};
 				
+				// Show the dropdown list and remove all previous items on it
 				$('#search-dropdown').show();
 				$('#search-dropdown a').remove();
 				
+				// Append list items to the dropdown list
 				results.forEach(result => {
-					$('#search-dropdown').append('<a class="dropdown-item" onclick="jumpToByName(\'' + result.value.properties.Name + '\');$(\'#search-dropdown\').fadeOut();">' + result.value.properties.Name + '<p>' + keyNameToFA(result.matchedPattern.matchedKey) +result.matchedPattern.matchedSubstr + '</p></a>');
+					$('#search-dropdown').append('<a class="dropdown-item" onclick="jumpToByName(\'' + result.value.properties.NameCN + '\');$(\'#search-dropdown\').fadeOut();">' + FeatureText.name(result.value) + '<p>' + keyNameToFA(result.matchedPattern.matchedKey) + result.matchedPattern.matchedSubstr + '</p></a>');
 				});
 			}
 			else {
+				// Hide the dropdown list when the input keyword is empty
 				$('#search-dropdown').fadeOut();
 			}
 		}
 		
+		// Jump to the point to which info refers
 		function jumpTo(info){
 			popup.remove();
 			if(info != undefined){
@@ -305,9 +394,10 @@
 			}
 		}
 		
+		// Jump to the point according to the name
 		function jumpToByName(name){
 			studentInfo.forEach(info => {
-				if(info.properties.Name == name){
+				if(info.properties.NameCN == name){
 					jumpTo(info);
 					return;
 				}
@@ -316,16 +406,20 @@
 		
 		function searchByKeyword(origKeyword, limit=4) {
 			var weightedResultList = [];
-			var keywords = origKeyword.toLowerCase().split(' ');
+			var keywords = origKeyword.trim().toLowerCase().split(' ');
+			if(keywords.length == 1 && keywords[0] == ""){
+				return weightedResultList;
+			}
 			studentInfo.forEach(info => {
 				var priority = 0;
 				var matchedPattern;
 				for(key in info.properties){
 					keywords.forEach(keyword => {
 						infoText = info.properties[key]?.toLowerCase();
-						if(infoText != undefined && infoText.indexOf(keyword) != -1){
+						var matchResult = (infoText != undefined)?PinyinMatch.match(infoText, keyword):false;
+						if(infoText != undefined && (infoText.indexOf(keyword) != -1 || matchResult)){
 							matchedPattern = {matchedKey:key, matchedSubstr:info.properties[key]};
-							if(infoText == keyword){
+							if(infoText == keyword || (matchResult != false && matchResult[1] - matchResult[0] + 1 == infoText.length)){
 								priority += 999;
 								return;
 							}
@@ -333,7 +427,7 @@
 							if(infoText.indexOf(keyword) == 0){
 								priority += 1;
 							}
-							if(key == 'Name'){
+							if(key == 'NameCN' || key == 'NameEN'){
 								priority += 4;
 							}
 						}
@@ -352,9 +446,12 @@
 	
 	function keyNameToFA(keyName){
 		switch(keyName){
-			case 'School':
+			case 'SchoolCN':
+			case 'SchoolLong':
+			case 'SchoolShort':
 				return '<i class="fa fa-university"></i>';
-			case 'Major':
+			case 'MajorCN':
+			case 'MajorEN':
 				return '<i class="fa fa-book"></i>';
 			case 'Phone':
 				return '<i class="fa fa-phone"></i>';
@@ -364,6 +461,68 @@
 				return '<i class="fa fa-home"></i>';
 		}
 		return '';
+	}
+	
+	var lang = 'CN';
+	
+	class FeatureText {
+		
+		static name(feature){
+			switch(lang){
+				case 'CN':
+					return feature.properties.NameCN;
+				case 'EN':
+					return feature.properties.NameEN;
+			}
+		}
+		
+		static class_(feature){
+			switch(lang){
+				case 'CN':
+					return '高三 (' + feature.properties.Class + ') 班';
+				case 'EN':
+					return 'Class ' + feature.properties.Class + ' Grade 12';
+			}
+		}
+		
+		static phone(feature){
+			return feature.properties.Phone;
+		}
+		
+		static wechat(feature){
+			return feature.properties.WeChat;
+		}
+		
+		static school(feature){
+			switch(lang){
+				case 'CN':
+					return feature.properties.SchoolCN;
+				case 'EN':
+					return feature.properties.SchoolLong;
+			}
+		}
+		
+		static major(feature){
+			switch(lang){
+				case 'CN':
+					return feature.properties.MajorCN;
+				case 'EN':
+					return feature.properties.MajorEN;
+			}
+		}
+		
+		static next(){
+			switch(lang){
+				case 'CN':
+					return "下一个";
+				case 'EN':
+					return "Next";
+			}
+		}
+		
+		static location(feature){
+			return feature.properties.CountryRegion + feature.properties.Region + feature.properties.City;
+		}
 	}
     </script>
 </body>
