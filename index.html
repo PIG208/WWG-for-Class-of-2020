@@ -1,0 +1,373 @@
+﻿
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.css" rel="stylesheet" />
+    <script src='https://npmcdn.com/csv2geojson@latest/csv2geojson.js'></script>
+    <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+	<link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+
+
+        #map {
+            position: absolute;
+            top: 10vh;
+            bottom: 0;
+            width: 100%;
+            height: 90%;
+        }
+
+        .navbar {
+            min-height: 10vh;
+        }
+		
+		.fa {
+			min-width: 1.5rem;
+		}
+		
+		.card {
+			border: none;
+			min-width: 20rem;
+		}
+		
+		#search-dropdown {
+			width: inherit;
+			overflow-x: hidden;
+		}
+		
+		.dropdown-item > p {
+			color: grey;
+		}
+
+        /* Popup styling */
+
+        .mapboxgl-popup {
+            padding-bottom: 5px;
+        }
+
+        .mapboxgl-popup-close-button {
+            display: none;
+        }
+
+        .mapboxgl-popup-content {
+            font: 400 15px/22px 'Noto Serif', serif;
+            padding: 0;
+            width: 250px;
+        }
+
+        .mapboxgl-popup-content-wrapper {
+            padding: 1%;
+        }
+
+        .mapboxgl-popup-content head3 {
+            background: rgb(61, 59, 59);
+            text-align: center;
+            color: #fff;
+            margin: 0;
+            display: block;
+            padding: 15px;
+            font-weight: 700;
+            margin-top: -5px;
+        }
+
+        .mapboxgl-popup-content head4 {
+            margin: 0;
+            display: block;
+            padding: 5px 3px 5px 10px;
+            font-weight: 400;
+        }
+
+        .mapboxgl-container {
+            cursor: pointer;
+        }
+
+        .mapboxgl-popup-anchor-top > .mapboxgl-popup-content {
+            margin-top: 3px;
+        }
+
+        .mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
+            border-bottom-color: rgb(61, 59, 59);
+        }
+    </style>
+
+
+</head>
+
+ <body>
+	<div>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light" style="z-index:100000">
+			<a class="navbar-brand">ASD</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarToggler">
+				<ul class="navbar-nav mr-auto mt-2 mt-md-0">
+					<li class="nav-item active">
+						<a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+					</li>
+				   
+				</ul>
+				<div style="position:relative">
+					<form id="form-search" class="input-group my-2 my-lg-0" onsubmit="return void 0;">
+						<input class="form-control" type="search" placeholder="Search">
+						<div id="search-dropdown" class="dropdown-menu">
+							<a class="dropdown-item" href="#">Action</a>
+						</div>
+						<div class="input-group-append">
+							<button type="submit" class="btn btn-outline-success">Search</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</nav>
+	</div>
+	<div id='map'></div>
+
+    <script>
+
+        var transformRequest = (url, resourceType) => {
+            var isMapboxRequest =
+                url.slice(8, 22) === "api.mapbox.com" ||
+                url.slice(10, 26) === "tiles.mapbox.com";
+            return {
+                url: isMapboxRequest
+                    ? url.replace("?", "?pluginName=sheetMapper&")
+                    : url
+            };
+        };
+		
+        //YOUR TURN: add your Mapbox token
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYWNraW5kbGUzIiwiYSI6ImNrYzYzcWFnOTA5bjQycnRlY2t4OWxlMWUifQ.a3wwi4cHq1sHakuoT9Bo0w';
+		
+		//Mapbox token
+        var map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/mapbox/streets-v11', //stylesheet location
+            center: [-122.411464, 37.7852299], // starting position
+            zoom: 4,// starting zoom
+            transformRequest: transformRequest
+        });
+		
+		var studentInfo = [];
+		var popup = new mapboxgl.Popup({ closeOnMove: true })
+		
+        $(document).ready(function () {
+            $.ajax({
+                type: "GET",
+                //YOUR TURN: Replace with csv export link
+                url: 'student',
+                dataType: "text",
+                success: function (csvData) { makeGeoJSON(csvData); }
+            });
+            function makeGeoJSON(csvData) {
+                csv2geojson.csv2geojson(csvData, {
+                    latfield: 'Latitude',
+                    lonfield: 'Longitude',
+                    delimiter: ','
+                }, function (err, data) {
+                    map.on('load', function () {
+
+                        //Add the the layer to the map
+                        map.addLayer({
+                            'id': 'csvData',
+                            'type': 'circle',
+                            'source': {
+                                'type': 'geojson',
+                                'data': data
+                            },
+                            'paint': {
+                                'circle-radius': 5,
+                                'circle-color': "purple"
+                            }
+                        });
+						
+                        // When a click event occurs on a feature in the csvData layer, open a popup at the
+                        // location of the feature, with description HTML from its properties.
+						data.features.forEach(feature => {
+							//studentInfo[(feature['properties']['Name'])] = feature;
+							studentInfo.push(feature);
+						});
+						
+						map.on('mouseover', 'csvData', function(e) {createPopup(e.features[0]);});
+						
+						map.on('touchend', 'csvData', function(e) {createPopup(e.features[0]);});
+
+                        // Change the cursor to a pointer when the mouse is over the places layer.
+                        map.on('mouseenter', 'csvData', function () {
+                            map.getCanvas().style.cursor = 'pointer';
+                        });
+
+                        // Change it back to a pointer when it leaves.
+                        map.on('mouseleave', 'places', function () {
+                            map.getCanvas().style.cursor = '';
+							popup.remove();
+                        });
+
+                        var bbox = turf.bbox(data);
+                        map.fitBounds(bbox, { padding: 50 });
+
+                    });
+
+                });
+            };
+		});
+		
+		function createPopup(feature) {
+			var coordinates = feature.geometry.coordinates.slice();
+			
+			//set popup text
+			//You can adjust the values of the popup to match the headers of your CSV.
+			// For example: e.features[0].properties.Name is retrieving information from the field Name in the original CSV.
+			var description = 
+			'<div class="card">' 
+				+ '<div class="card-body">'
+					+ '<h5 class="card-title">' + feature.properties.Name + '</h5>'
+					+ '<ul style="list-style:none; padding-left:0">'
+						+ '<li>' + '<i class="fa fa-university"></i>'+ feature.properties.School + '</li>'
+						+ '<li>' + '<i class="fa fa-book"></i>' + feature.properties.Major + '</li>'
+						+ '<li>' + '<i class="fa fa-phone"></i>' + feature.properties.Phone + '</li>'
+						+ '<li>' + '<i class="fa fa-wechat"></i>' + feature.properties.WeChat + '</li>'
+						+ '<li>' + '<i class="fa fa-home"></i>'  + '高三&nbsp(' + feature.properties.Class + ')&nbsp班' + '</li>' 
+					+ '</ul>'
+				+ '</div>' 
+			+ '</div>';
+				
+			//add Popup to map
+			popup.setLngLat(coordinates)
+				.setHTML(description)
+				.addTo(map);
+		}
+		
+		$("#form-search > input").on('keyup', function(e){
+			updateSearchDropDown();
+		});
+		
+		// By submitting a search action without selecting displayed choices, the user will be guided to the most possible choice
+		$('#form-search').submit(function(e){
+			e.preventDefault();
+			const keyword = $('#form-search > input')[0].value;
+			var info = searchByKeyword(keyword, 1)[0]?.value;
+			if(info != undefined){
+				$('#form-search > input')[0].value = '';
+				jumpTo(info);
+			}
+		});
+		
+		function updateSearchDropDown(){
+			const keyword = $('#form-search > input')[0].value;
+			
+			if(keyword != ''){
+				results = searchByKeyword(keyword)
+				if(results.length == 0) {
+					$('#search-dropdown').fadeOut();
+					return;
+				};
+				
+				$('#search-dropdown').show();
+				$('#search-dropdown a').remove();
+				
+				results.forEach(result => {
+					$('#search-dropdown').append('<a class="dropdown-item" onclick="jumpToByName(\'' + result.value.properties.Name + '\');$(\'#search-dropdown\').fadeOut();">' + result.value.properties.Name + '<p>' + keyNameToFA(result.matchedPattern.matchedKey) +result.matchedPattern.matchedSubstr + '</p></a>');
+				});
+			}
+			else {
+				$('#search-dropdown').fadeOut();
+			}
+		}
+		
+		function jumpTo(info){
+			popup.remove();
+			if(info != undefined){
+				map.jumpTo({
+					center: info.geometry.coordinates,
+					zoom: 10
+					});
+				createPopup(info);
+			}
+		}
+		
+		function jumpToByName(name){
+			studentInfo.forEach(info => {
+				if(info.properties.Name == name){
+					jumpTo(info);
+					return;
+				}
+			});
+		}
+		
+		function searchByKeyword(origKeyword, limit=4) {
+			var weightedResultList = [];
+			var keywords = origKeyword.toLowerCase().split(' ');
+			studentInfo.forEach(info => {
+				var priority = 0;
+				var matchedPattern;
+				for(key in info.properties){
+					keywords.forEach(keyword => {
+						infoText = info.properties[key]?.toLowerCase();
+						if(infoText != undefined && infoText.indexOf(keyword) != -1){
+							matchedPattern = {matchedKey:key, matchedSubstr:info.properties[key]};
+							if(infoText == keyword){
+								priority += 999;
+								return;
+							}
+							priority += keyword.length;
+							if(infoText.indexOf(keyword) == 0){
+								priority += 1;
+							}
+							if(key == 'Name'){
+								priority += 4;
+							}
+						}
+					});
+					if(priority >= 999){
+						break;
+					}
+				}
+				if(priority > 0){
+					weightedResultList.push({priority: priority, value:info, matchedPattern:matchedPattern});
+				}
+			});
+			weightedResultList.sort((a,b) => (Math.sign(b.priority - a.priority)));
+			return weightedResultList.slice(0, limit);
+	}
+	
+	function keyNameToFA(keyName){
+		switch(keyName){
+			case 'School':
+				return '<i class="fa fa-university"></i>';
+			case 'Major':
+				return '<i class="fa fa-book"></i>';
+			case 'Phone':
+				return '<i class="fa fa-phone"></i>';
+			case 'WeChat':
+				return '<i class="fa fa-wechat"></i>';
+			case 'Class':
+				return '<i class="fa fa-home"></i>';
+		}
+		return '';
+	}
+    </script>
+</body>
+
+
+
+</html>
