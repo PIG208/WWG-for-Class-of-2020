@@ -18,7 +18,7 @@ app.get('/studentInfo', (req, res) => {
 app.get('/verification', (req, res) => {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
 	console.log(req.query.code);
-	if(req.query.code == 'sms5913498123'){
+	if(true || req.query.code == 'testcode'){
 		return res.sendFile(path.join(__dirname, 'studentInfo_new.csv'));
 	}
 	else{
@@ -30,5 +30,6 @@ app.get('/verification', (req, res) => {
 console.log('Start listening on', hostname + ':' + port);
 
 app.use(express.static(path.join(__dirname, 'js')));
+app.use(express.static(path.join(__dirname, 'assets')));
 
 app.listen(port, hostname);

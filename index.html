@@ -51,6 +51,24 @@
 		
 		.card > ul > button{
 		}
+
+        #overlay {
+            display: none;
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(61, 59, 59, 0.39);
+        }
+
+        #loading {
+            z-index: 500;
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            margin-left: -60px;
+            height: 120px;
+            width: 120px;
+        }
 		
 		#search-dropdown {
 			width: inherit;
@@ -65,6 +83,10 @@
 			color: red;
 			opacity: 0;
 		}
+
+        .dropdown-item {
+			cursor: pointer;
+        }
 		
 		.dropdown-item > p {
 			color: grey;
@@ -124,7 +146,7 @@
 
 </head>
 
- <body>
+ <body lang="zh-cn">
 	<div>
 		<nav class="navbar navbar-expand-lg navbar-light bg-light" style="z-index:100">
 			<a class="navbar-brand">Where We Go for 2020</a>
@@ -134,18 +156,18 @@
 			<div class="collapse navbar-collapse" id="navbarToggler">
 				<ul class="navbar-nav mr-auto mt-2 mt-md-0">
 					<li class="nav-item active">
-						<a class="nav-link" href="#">Map <span class="sr-only">(current)</span></a>
+						<a id="a-switch-lang" class="nav-link" href="#">English</a>
 					</li>
 				   
 				</ul>
 				<div style="position:relative">
 					<form id="form-search" class="input-group my-2 my-lg-0" onsubmit="return void 0;">
-						<input class="form-control" type="search" placeholder="Search">
+						<input class="form-control" type="search" placeholder="搜索">
 						<div id="search-dropdown" class="dropdown-menu">
 							<a class="dropdown-item" href="#">Action</a>
 						</div>
 						<div class="input-group-append">
-							<button type="submit" class="btn btn-outline-success">Search</button>
+							<button type="submit" class="btn btn-outline-success">搜索</button>
 						</div>
 					</form>
 				</div>
@@ -153,6 +175,9 @@
 		</nav>
 	</div>
 	<div id='map'></div>
+	 <div id="overlay">
+		<img id="loading" src="loading.svg"/>
+	 </div>
 	<div id="verification" class="modal" tabindex="-1" role="dialog">
 	  <div class="modal-dialog modal-sm">
 		<div class="modal-content">
@@ -161,7 +186,7 @@
 		  </div>
 		  <div class="modal-body">
 			<form id="form-verification" class="input-group">
-				<input type="password" class="form-control" placeholder="输入访问密码"></input>
+				<input type="password" class="form-control" placeholder="输入访问密码"/>
 				<div class="input-group-append">
 					<button type="submit" class="btn btn-primary" onclick="return void 0;">验证</button>
 				</div>
@@ -189,7 +214,7 @@
 		
 		var map;
 		var studentInfo = [];
-		var popup = new mapboxgl.Popup({ closeOnMove: true , closeOnClick: false})
+		var popup = new mapboxgl.Popup({ closeOnMove: true, closeOnClick: true })
 		
         $(document).ready(function () {
 		
@@ -201,13 +226,14 @@
 				
 				if(param['code'] != ""){
 					$.ajax({
-						type: "GET",
+						type: 'GET',
 						url: 'verification',
-						dataType: "text",
+						dataType: 'text',
 						data: param,
 						success: function (csvData) { 
 							initialize(csvData); 
-							$("#verification").modal('hide');
+							$('#verification').modal('hide');
+							$('#overlay').show();
 						},
 						error: function (res) {
 							$('#form-verification > input').val('');
@@ -276,7 +302,8 @@
                         });
 
                         var bbox = turf.bbox(data);
-                        map.fitBounds(bbox, { padding: 50 });
+						map.fitBounds(bbox, { padding: 50 });
+						$('#overlay').fadeOut();
 
                     });
 
@@ -359,9 +386,9 @@
 		function updateSearchDropDown(){
 			const keyword = $('#form-search > input')[0].value;
 			
-			if(keyword != ''){
+			if (keyword != '' && keyword.length >= 2) {
 				// Generate the search results and hide the dropdown list in case there's no matches
-				results = searchByKeyword(keyword)
+                results = searchByKeyword(keyword)
 				if(results.length == 0) {
 					$('#search-dropdown').fadeOut();
 					return;
@@ -406,42 +433,49 @@
 		
 		function searchByKeyword(origKeyword, limit=4) {
 			var weightedResultList = [];
-			var keywords = origKeyword.trim().toLowerCase().split(' ');
-			if(keywords.length == 1 && keywords[0] == ""){
+			var keyword = origKeyword.trim().toLowerCase();
+			if (keyword == '') {
 				return weightedResultList;
 			}
-			studentInfo.forEach(info => {
+			for (var i = 0; i < studentInfo.length; i++) {
 				var priority = 0;
 				var matchedPattern;
-				for(key in info.properties){
-					keywords.forEach(keyword => {
-						infoText = info.properties[key]?.toLowerCase();
-						var matchResult = (infoText != undefined)?PinyinMatch.match(infoText, keyword):false;
-						if(infoText != undefined && (infoText.indexOf(keyword) != -1 || matchResult)){
-							matchedPattern = {matchedKey:key, matchedSubstr:info.properties[key]};
-							if(infoText == keyword || (matchResult != false && matchResult[1] - matchResult[0] + 1 == infoText.length)){
-								priority += 999;
-								return;
-							}
-							priority += keyword.length;
-							if(infoText.indexOf(keyword) == 0){
-								priority += 1;
-							}
-							if(key == 'NameCN' || key == 'NameEN'){
-								priority += 4;
+				// Iterate through each key-value pair studentInfo contains
+                for (key in studentInfo[i].properties) {
+					infoText = studentInfo[i].properties[key]?.toLowerCase();
+					var matchResult = (infoText != undefined) ? PinyinMatch.match(infoText, keyword) : false;
+                    if (infoText != undefined && (infoText.indexOf(keyword) != -1 || matchResult)) {
+                        var aliases = studentInfo[i].properties[key].split(';');
+						var matchedSubstr = studentInfo[i].properties[key];
+						for (var n = 0; n < aliases.length; n++) {
+							if (aliases[n].toLowerCase().indexOf(keyword) != -1) {
+								matchedSubstr = aliases[n];
 							}
 						}
-					});
-					if(priority >= 999){
+						matchedPattern = { matchedKey: key, matchedSubstr: matchedSubstr };
+                        if (infoText == keyword || (matchResult != false && matchResult[1] - matchResult[0] + 1 == infoText.length)) {
+							priority += 999;
+							break;
+						}
+						priority += keyword.length;
+						if(infoText.indexOf(keyword) == 0){
+							priority += 1;
+						}
+						if(key == 'NameCN' || key == 'NameEN'){
+							priority += 4;
+						}
+					}
+				}
+                if (priority > 0) {
+					weightedResultList.push({ priority: priority, value: studentInfo[i], matchedPattern: matchedPattern });
+                    if (weightedResultList.length == limit) {
 						break;
 					}
 				}
-				if(priority > 0){
-					weightedResultList.push({priority: priority, value:info, matchedPattern:matchedPattern});
-				}
-			});
+            };
+            console.log("Addedasdasda", weightedResultList.length);
 			weightedResultList.sort((a,b) => (Math.sign(b.priority - a.priority)));
-			return weightedResultList.slice(0, limit);
+			return weightedResultList;
 	}
 	
 	function keyNameToFA(keyName){
@@ -462,25 +496,47 @@
 		}
 		return '';
 	}
-	
-	var lang = 'CN';
-	
+
+		// 0 for Chinese, 1 for English
+		var lang = 0
+
+		$('#a-switch-lang').click(function (e) {
+			// Toggles the language
+			lang ^= 1;
+			navSwitchLanguage();
+		});
+
+        function navSwitchLanguage() {
+			switch (lang) {
+				case 0:
+					$('.nav-item > .nav-link')[0].innerHTML = 'English';
+					$('#form-search > .form-control')[0].placeholder = '搜索';
+					$('#form-search > .input-group-append > .btn').text('搜索');
+					break;
+				case 1:
+					$('.nav-item > .nav-link')[0].innerHTML = '中文';
+					$('#form-search > .form-control')[0].placeholder = 'Search';
+					$('#form-search > .input-group-append > .btn').text('Search');
+					break;
+            }
+		}
+
 	class FeatureText {
 		
 		static name(feature){
 			switch(lang){
-				case 'CN':
+				case 0:
 					return feature.properties.NameCN;
-				case 'EN':
+				case 1:
 					return feature.properties.NameEN;
 			}
 		}
 		
 		static class_(feature){
 			switch(lang){
-				case 'CN':
+				case 0:
 					return '高三 (' + feature.properties.Class + ') 班';
-				case 'EN':
+				case 1:
 					return 'Class ' + feature.properties.Class + ' Grade 12';
 			}
 		}
@@ -495,27 +551,27 @@
 		
 		static school(feature){
 			switch(lang){
-				case 'CN':
+				case 0:
 					return feature.properties.SchoolCN;
-				case 'EN':
+				case 1:
 					return feature.properties.SchoolLong;
 			}
 		}
 		
 		static major(feature){
 			switch(lang){
-				case 'CN':
+				case 0:
 					return feature.properties.MajorCN;
-				case 'EN':
+				case 1:
 					return feature.properties.MajorEN;
 			}
 		}
 		
 		static next(){
 			switch(lang){
-				case 'CN':
+				case 0:
 					return "下一个";
-				case 'EN':
+				case 1:
 					return "Next";
 			}
 		}
