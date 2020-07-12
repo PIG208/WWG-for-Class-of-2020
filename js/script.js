@@ -112,7 +112,6 @@
 
 		// Create a popup on the destinated point
 		function createPopup(features) {
-			console.log(features);
 			var coordinates = features[0].geometry.coordinates.slice();
 			var i = 0;
 
@@ -148,7 +147,6 @@
 		}
 
 		function createModal(features) {
-			console.log(features);
 			var i = 0;
 
 			formatDescription($('#card-info'), features[i++]);
