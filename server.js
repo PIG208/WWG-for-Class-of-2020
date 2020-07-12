@@ -30,6 +30,7 @@ app.get('/verification', (req, res) => {
 console.log('Start listening on', hostname + ':' + port);
 
 app.use(express.static(path.join(__dirname, 'js')));
+app.use(express.static(path.join(__dirname, 'css')));
 app.use(express.static(path.join(__dirname, 'assets')));
 
 app.listen(port, hostname);

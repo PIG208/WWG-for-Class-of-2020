@@ -15,572 +15,81 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
-
-
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-
-
-        #map {
-            position: absolute;
-            top: 10vh;
-            bottom: 0;
-            width: 100%;
-            height: 90%;
-        }
-
-        .navbar {
-            min-height: 10vh;
-        }
-		
-		.fa {
-			min-width: 1.5rem;
-		}
-		
-		.card {
-			border: none;
-			min-width: 20rem;
-		}
-		
-		.card > ul > button{
-		}
-
-        #overlay {
-            display: none;
-            position: fixed;
-            height: 100%;
-            width: 100%;
-            background-color: rgba(61, 59, 59, 0.39);
-        }
-
-        #loading {
-            z-index: 500;
-            position: absolute;
-            top: 30%;
-            left: 50%;
-            margin-left: -60px;
-            height: 120px;
-            width: 120px;
-        }
-		
-		#search-dropdown {
-			width: inherit;
-			overflow-x: hidden;
-		}
-		
-		#btn-next {
-			border-radius: 0 0 0.25rem 0.25rem;
-		}
-		
-		#msg-wrong {
-			color: red;
-			opacity: 0;
-		}
-
-        .dropdown-item {
-			cursor: pointer;
-        }
-		
-		.dropdown-item > p {
-			color: grey;
-		}
-
-        /* Popup styling */
-
-        .mapboxgl-popup {
-            padding-bottom: 5px;
-        }
-
-        .mapboxgl-popup-close-button {
-            display: none;
-        }
-
-        .mapboxgl-popup-content {
-            font: 400 15px/22px 'Noto Serif', serif;
-            padding: 0;
-            width: 250px;
-        }
-
-        .mapboxgl-popup-content-wrapper {
-            padding: 1%;
-        }
-
-        .mapboxgl-popup-content head3 {
-            background: rgb(61, 59, 59);
-            text-align: center;
-            color: #fff;
-            margin: 0;
-            display: block;
-            padding: 15px;
-            font-weight: 700;
-            margin-top: -5px;
-        }
-
-        .mapboxgl-popup-content head4 {
-            margin: 0;
-            display: block;
-            padding: 5px 3px 5px 10px;
-            font-weight: 400;
-        }
-
-        .mapboxgl-container {
-            cursor: pointer;
-        }
-
-        .mapboxgl-popup-anchor-top > .mapboxgl-popup-content {
-            margin-top: 3px;
-        }
-
-        .mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
-            border-bottom-color: rgb(61, 59, 59);
-        }
-    </style>
-
+	<link href="main.css" rel="stylesheet"/>
 
 </head>
 
- <body lang="zh-cn">
-	<div>
-		<nav class="navbar navbar-expand-lg navbar-light bg-light" style="z-index:100">
-			<a class="navbar-brand">Where We Go for 2020</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarToggler">
-				<ul class="navbar-nav mr-auto mt-2 mt-md-0">
-					<li class="nav-item active">
-						<a id="a-switch-lang" class="nav-link" href="#">English</a>
-					</li>
-				   
-				</ul>
-				<div style="position:relative">
-					<form id="form-search" class="input-group my-2 my-lg-0" onsubmit="return void 0;">
-						<input class="form-control" type="search" placeholder="搜索">
-						<div id="search-dropdown" class="dropdown-menu">
-							<a class="dropdown-item" href="#">Action</a>
-						</div>
+<body lang="zh-cn">
+	<nav class="navbar navbar-expand-md navbar-light bg-light" style="z-index:100">
+		<a class="navbar-brand">Where We Go for 2020</a>
+		<div class="navbar-container">
+			<ul class="navbar-nav mr-auto mt-2 mt-md-0"></ul>
+			<div class="search-container">
+				<form id="form-search" class="input-group my-2 my-lg-0" onsubmit="return void 0;">
+					<input class="form-control" type="search" placeholder="搜索">
+					<div id="search-dropdown" class="dropdown-menu"></div>
+					<div class="input-group-append">
+						<button type="submit" class="btn btn-outline-success">搜索</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</nav>
+	<div id='map'></div>
+	<div id="overlay">
+		<img id="loading" src="loading.svg" />
+	</div>
+	<div id="verification" data-backdrop="static" class="modal" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">身份验证</h5>
+				</div>
+				<div class="modal-body">
+					<form id="form-verification" class="input-group">
+						<input type="password" class="form-control" placeholder="输入访问密码" />
 						<div class="input-group-append">
-							<button type="submit" class="btn btn-outline-success">搜索</button>
+							<button type="submit" class="btn btn-primary" onclick="return void 0;">验证</button>
 						</div>
 					</form>
 				</div>
 			</div>
-		</nav>
-	</div>
-	<div id='map'></div>
-	 <div id="overlay">
-		<img id="loading" src="loading.svg"/>
-	 </div>
-	<div id="verification" class="modal" tabindex="-1" role="dialog">
-	  <div class="modal-dialog modal-sm">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<h5 class="modal-title">身份验证</h5>
-		  </div>
-		  <div class="modal-body">
-			<form id="form-verification" class="input-group">
-				<input type="password" class="form-control" placeholder="输入访问密码"/>
-				<div class="input-group-append">
-					<button type="submit" class="btn btn-primary" onclick="return void 0;">验证</button>
-				</div>
-			</form>
-		  </div>
 		</div>
-	  </div>
 	</div>
-
+	<div id="card-info" class="modal fade" role="dialog">
+		<div id="modal-popup" class="modal-dialog modal-md modal-dialog-centered">
+			<div class="modal-content card card-modal">
+				<div class="modal-header">
+					<h5 class="card-title">asd</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						&times;
+					</button>
+				</div>
+				<div class="card-body">
+					<ul style="list-style:none; padding-left:0">
+						<li><i class="fa fa-university"></i><span></span></li>
+						<li><i class="fa fa-book"></i><span></span></li>
+						<li><i class="fa fa-phone"></i><span></span></li>
+						<li><i class="fa fa-wechat"></i><span></span></li>
+						<li><i class="fa fa-home"></i><span></span></li>
+					</ul>
+				</div>
+				<button id="modal-btn-next" class="btn btn-primary">下一个<span>1/3</span><i class="fa fa-angle-right"></i></button>
+			</div>
+		</div>
+	</div>
+	<div id="btn-group-switch-lang">
+		<div class="btn-group btn-group-toggle" data-toggle="buttons">
+			<label class="btn btn-primary">
+				<input type="radio" name="lang" id="option-cn" checked=""> CN
+			</label>
+			<label class="btn btn-primary active">
+				<input type="radio" name="lang" id="option-en"> EN
+			</label>
+		</div>
+	</div>
 	<script src="main.js"></script>
-    <script>
-        var transformRequest = (url, resourceType) => {
-            var isMapboxRequest =
-                url.slice(8, 22) === "api.mapbox.com" ||
-                url.slice(10, 26) === "tiles.mapbox.com";
-            return {
-                url: isMapboxRequest
-                    ? url.replace("?", "?pluginName=sheetMapper&")
-                    : url
-            };
-        };
-		
-        //YOUR TURN: add your Mapbox token
-        mapboxgl.accessToken = 'pk.eyJ1IjoiYWNraW5kbGUzIiwiYSI6ImNrYzYzcWFnOTA5bjQycnRlY2t4OWxlMWUifQ.a3wwi4cHq1sHakuoT9Bo0w';
-		
-		var map;
-		var studentInfo = [];
-		var popup = new mapboxgl.Popup({ closeOnMove: true, closeOnClick: true })
-		
-        $(document).ready(function () {
-		
-			$("#verification").modal('show');
-			
-			$('#form-verification').submit(function(e){
-				e.preventDefault();
-				const param = {code:$('#form-verification > input').val().trim()};
-				
-				if(param['code'] != ""){
-					$.ajax({
-						type: 'GET',
-						url: 'verification',
-						dataType: 'text',
-						data: param,
-						success: function (csvData) { 
-							initialize(csvData); 
-							$('#verification').modal('hide');
-							$('#overlay').show();
-						},
-						error: function (res) {
-							$('#form-verification > input').val('');
-							$('#msg-wrong').remove();
-							$('#verification').find('.modal-body').prepend('<p id="msg-wrong">访问密码错误</p>');
-							$('#msg-wrong').animate({'opacity':1},500)
-						}
-					});
-				}
-			});
-			
-			function initialize(csvData){
-				//Mapbox token
-				map = new mapboxgl.Map({
-					container: 'map', // container id
-					style: 'mapbox://styles/mapbox/streets-v11', //stylesheet location
-					center: [114.121677, 22.551557], // starting position
-					zoom: 4,// starting zoom
-					transformRequest: transformRequest
-				});
-				makeGeoJSON(csvData);
-			}
-			
-            function makeGeoJSON(csvData) {
-                csv2geojson.csv2geojson(csvData, {
-                    latfield: 'Latitude',
-                    lonfield: 'Longitude',
-                    delimiter: ','
-                }, function (err, data) {
-                    map.on('load', function () {
-						console.log(data);
-                        //Add the the layer to the map
-                        map.addLayer({
-                            'id': 'csvData',
-                            'type': 'circle',
-                            'source': {
-                                'type': 'geojson',
-                                'data': data
-                            },
-                            'paint': {
-                                'circle-radius': 5,
-                                'circle-color': "purple"
-                            }
-                        });
-						
-                        // When a click event occurs on a feature in the csvData layer, open a popup at the
-                        // location of the feature, with description HTML from its properties.
-						data.features.forEach(feature => {
-							//studentInfo[(feature['properties']['Name'])] = feature;
-							studentInfo.push(feature);
-						});
-						
-						map.on('mouseover', 'csvData', function(e) {createPopup(e.features);});
-						
-						map.on('touchend', 'csvData', function(e) {createPopup(e.features);});
-
-                        // Change the cursor to a pointer when the mouse is over the places layer.
-                        map.on('mouseenter', 'csvData', function () {
-                            map.getCanvas().style.cursor = 'pointer';
-                        });
-
-                        // Change it back to a pointer when it leaves.
-                        map.on('mouseleave', 'places', function () {
-                            map.getCanvas().style.cursor = '';
-							popup.remove();
-                        });
-
-                        var bbox = turf.bbox(data);
-						map.fitBounds(bbox, { padding: 50 });
-						$('#overlay').fadeOut();
-
-                    });
-
-                });
-            };
-		});
-		
-		// Create a popup on the destinated point
-		function createPopup(features) {
-			var coordinates = features[0].geometry.coordinates.slice();
-			var i = 0;
-			
-			temp = '<div id="popup" class="card">' 
-							+ '<div class="card-body">'
-								+ '<h5 class="card-title"></h5>'
-								+ '<ul style="list-style:none; padding-left:0">'
-									+ '<li>' + '<i class="fa fa-university"></i><span></span></li>'
-									+ '<li>' + '<i class="fa fa-book"></i><span></span></li>'
-									+ '<li>' + '<i class="fa fa-phone"></i><span></span></li>'
-									+ '<li>' + '<i class="fa fa-wechat"></i><span></span></li>'
-									+ '<li>' + '<i class="fa fa-home"></i><span></span></li>'
-								+ '</ul>'
-							+ '</div>'
-						+ '</div>';
-			
-			//set popup text
-			//You can adjust the values of the popup to match the headers of your CSV.
-			// For example: e.features[0].properties.Name is retrieving information from the field Name in the original CSV.
-			function formatDescription(element, feature){
-				element.find('h5').text(FeatureText.name(feature));
-				element.find('span').get(0).innerHTML = FeatureText.school(feature);
-				element.find('span').get(1).innerHTML = FeatureText.major(feature);
-				element.find('span').get(2).innerHTML = FeatureText.phone(feature);
-				element.find('span').get(3).innerHTML = FeatureText.wechat(feature);
-				element.find('span').get(4).innerHTML = FeatureText.class_(feature);
-				element.find('li').each((i, e) => {
-					if($(e).find('span').text().trim() == ''){
-						$(e).hide();
-					} else {
-						$(e).show();
-					}
-				});
-				return element;
-			}
-			
-			var description = formatDescription($(temp), features[i++])[0].outerHTML;
-			
-			//add Popup to map
-			popup.setLngLat(coordinates)
-				.setHTML(description)
-				.addTo(map);
-			
-			// When there're multiple people at the same point
-			if(features.length > 1){
-				$('#popup').append('<button id="btn-next" class="btn btn-primary">' + FeatureText.next() + ' <span>' + i + '/' + features.length + '</span><i class="fa fa-angle-right"></i>' + '</button>');
-				$('#btn-next').click(e => {
-					if(i == features.length) i = 0;
-					$("#popup").find('span').get(5).innerHTML = (i + 1) + '/' + features.length;
-					formatDescription($('#popup'), features[i++]);
-				});
-			}
-		}
-		
-		$("#form-search > input").on('keyup', function(e){
-			updateSearchDropDown();
-		});
-		
-		// By submitting a search action without selecting displayed choices, the user will be guided to the most possible choice
-		$('#form-search').submit(function(e){
-			e.preventDefault();
-			const keyword = $('#form-search > input')[0].value;
-			var info = searchByKeyword(keyword, 1)[0]?.value;
-			if(info != undefined){
-				$('#form-search > input')[0].value = '';
-				jumpTo(info);
-			}
-		});
-		
-		// Update the dropdown list according to the keyword
-		function updateSearchDropDown(){
-			const keyword = $('#form-search > input')[0].value;
-			
-			if (keyword != '' && keyword.length >= 2) {
-				// Generate the search results and hide the dropdown list in case there's no matches
-                results = searchByKeyword(keyword)
-				if(results.length == 0) {
-					$('#search-dropdown').fadeOut();
-					return;
-				};
-				
-				// Show the dropdown list and remove all previous items on it
-				$('#search-dropdown').show();
-				$('#search-dropdown a').remove();
-				
-				// Append list items to the dropdown list
-				results.forEach(result => {
-					$('#search-dropdown').append('<a class="dropdown-item" onclick="jumpToByName(\'' + result.value.properties.NameCN + '\');$(\'#search-dropdown\').fadeOut();">' + FeatureText.name(result.value) + '<p>' + keyNameToFA(result.matchedPattern.matchedKey) + result.matchedPattern.matchedSubstr + '</p></a>');
-				});
-			}
-			else {
-				// Hide the dropdown list when the input keyword is empty
-				$('#search-dropdown').fadeOut();
-			}
-		}
-		
-		// Jump to the point to which info refers
-		function jumpTo(info){
-			popup.remove();
-			if(info != undefined){
-				map.jumpTo({
-					center: info.geometry.coordinates,
-					zoom: 10
-					});
-				createPopup([info]);
-			}
-		}
-		
-		// Jump to the point according to the name
-		function jumpToByName(name){
-			studentInfo.forEach(info => {
-				if(info.properties.NameCN == name){
-					jumpTo(info);
-					return;
-				}
-			});
-		}
-		
-		function searchByKeyword(origKeyword, limit=4) {
-			var weightedResultList = [];
-			var keyword = origKeyword.trim().toLowerCase();
-			if (keyword == '') {
-				return weightedResultList;
-			}
-			for (var i = 0; i < studentInfo.length; i++) {
-				var priority = 0;
-				var matchedPattern;
-				// Iterate through each key-value pair studentInfo contains
-                for (key in studentInfo[i].properties) {
-					infoText = studentInfo[i].properties[key]?.toLowerCase();
-					var matchResult = (infoText != undefined) ? PinyinMatch.match(infoText, keyword) : false;
-                    if (infoText != undefined && (infoText.indexOf(keyword) != -1 || matchResult)) {
-                        var aliases = studentInfo[i].properties[key].split(';');
-						var matchedSubstr = studentInfo[i].properties[key];
-						for (var n = 0; n < aliases.length; n++) {
-							if (aliases[n].toLowerCase().indexOf(keyword) != -1) {
-								matchedSubstr = aliases[n];
-							}
-						}
-						matchedPattern = { matchedKey: key, matchedSubstr: matchedSubstr };
-                        if (infoText == keyword || (matchResult != false && matchResult[1] - matchResult[0] + 1 == infoText.length)) {
-							priority += 999;
-							break;
-						}
-						priority += keyword.length;
-						if(infoText.indexOf(keyword) == 0){
-							priority += 1;
-						}
-						if(key == 'NameCN' || key == 'NameEN'){
-							priority += 4;
-						}
-					}
-				}
-                if (priority > 0) {
-					weightedResultList.push({ priority: priority, value: studentInfo[i], matchedPattern: matchedPattern });
-                    if (weightedResultList.length == limit) {
-						break;
-					}
-				}
-            };
-            console.log("Addedasdasda", weightedResultList.length);
-			weightedResultList.sort((a,b) => (Math.sign(b.priority - a.priority)));
-			return weightedResultList;
-	}
-	
-	function keyNameToFA(keyName){
-		switch(keyName){
-			case 'SchoolCN':
-			case 'SchoolLong':
-			case 'SchoolShort':
-				return '<i class="fa fa-university"></i>';
-			case 'MajorCN':
-			case 'MajorEN':
-				return '<i class="fa fa-book"></i>';
-			case 'Phone':
-				return '<i class="fa fa-phone"></i>';
-			case 'WeChat':
-				return '<i class="fa fa-wechat"></i>';
-			case 'Class':
-				return '<i class="fa fa-home"></i>';
-		}
-		return '';
-	}
-
-		// 0 for Chinese, 1 for English
-		var lang = 0
-
-		$('#a-switch-lang').click(function (e) {
-			// Toggles the language
-			lang ^= 1;
-			navSwitchLanguage();
-		});
-
-        function navSwitchLanguage() {
-			switch (lang) {
-				case 0:
-					$('.nav-item > .nav-link')[0].innerHTML = 'English';
-					$('#form-search > .form-control')[0].placeholder = '搜索';
-					$('#form-search > .input-group-append > .btn').text('搜索');
-					break;
-				case 1:
-					$('.nav-item > .nav-link')[0].innerHTML = '中文';
-					$('#form-search > .form-control')[0].placeholder = 'Search';
-					$('#form-search > .input-group-append > .btn').text('Search');
-					break;
-            }
-		}
-
-	class FeatureText {
-		
-		static name(feature){
-			switch(lang){
-				case 0:
-					return feature.properties.NameCN;
-				case 1:
-					return feature.properties.NameEN;
-			}
-		}
-		
-		static class_(feature){
-			switch(lang){
-				case 0:
-					return '高三 (' + feature.properties.Class + ') 班';
-				case 1:
-					return 'Class ' + feature.properties.Class + ' Grade 12';
-			}
-		}
-		
-		static phone(feature){
-			return feature.properties.Phone;
-		}
-		
-		static wechat(feature){
-			return feature.properties.WeChat;
-		}
-		
-		static school(feature){
-			switch(lang){
-				case 0:
-					return feature.properties.SchoolCN;
-				case 1:
-					return feature.properties.SchoolLong;
-			}
-		}
-		
-		static major(feature){
-			switch(lang){
-				case 0:
-					return feature.properties.MajorCN;
-				case 1:
-					return feature.properties.MajorEN;
-			}
-		}
-		
-		static next(){
-			switch(lang){
-				case 0:
-					return "下一个";
-				case 1:
-					return "Next";
-			}
-		}
-		
-		static location(feature){
-			return feature.properties.CountryRegion + feature.properties.Region + feature.properties.City;
-		}
-	}
-    </script>
+	<script src="script.js"></script>
 </body>
 
 
