@@ -76,7 +76,7 @@
 								'data': data
 							},
 							'paint': {
-								'circle-radius': 5,
+								'circle-radius': 10,
 								'circle-color': "purple"
 							}
 						});
