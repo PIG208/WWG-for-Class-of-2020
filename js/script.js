@@ -55,6 +55,8 @@
 					zoom: 4,// starting zoom
 					transformRequest: transformRequest
 				});
+				map.dragRotate.disable();
+				map.touchZoomRotate.disableRotation();
 				makeGeoJSON(csvData);
 			}
 
@@ -114,10 +116,15 @@
 		function createPopup(features) {
 			var coordinates = features[0].geometry.coordinates.slice();
 			var i = 0;
+			function appendPageCount(){
+				$("#popup").find('.card-title').append('<span class="page-count"> (' + (i + 1) + '/' + features.length + ')</span>');
+			}
 
 			temp = '<div id="popup" class="card">'
 				+ '<div class="card-body">'
-				+ '<h5 class="card-title"></h5>'
+				+ '<div class="card-title-container">'
+					+ '<h5 class="card-title"></h5>'
+				+ '</div>'
 				+ '<ul style="list-style:none; padding-left:0">'
 				+ '<li>' + '<i class="fa fa-university"></i><span></span></li>'
 				+ '<li>' + '<i class="fa fa-book"></i><span></span></li>'
@@ -128,40 +135,76 @@
 				+ '</div>'
 				+ '</div>';
 
-			var description = formatDescription($(temp), features[i++])[0].outerHTML;
+			var description = formatDescription($(temp), features[i])[0].outerHTML;
 
-			//add Popup to map
+			// Add Popup to map
 			popup.setLngLat(coordinates)
 				.setHTML(description)
 				.addTo(map);
 
 			// When there're multiple people at the same point
 			if (features.length > 1) {
-				$('#popup').append('<button id="btn-next" class="btn btn-primary">' + FeatureText.next() + ' <span>' + i + '/' + features.length + '</span><i class="fa fa-angle-right"></i>' + '</button>');
+				appendPageCount();
+				
+				// Add btn group to the popup
+				$('#popup').append(
+				'<div class="btn-group">'
+					+'<button id="btn-prev" class="btn btn-primary">' 
+						+ FeatureText.prev()
+						+ '<i class="fa fa-angle-right"></i>' 
+					+ '</button>'
+					+ '<button id="btn-next" class="btn btn-primary">' 
+						+ FeatureText.next()
+						+ '<i class="fa fa-angle-right"></i>'
+					+ '</button>'
+				+ '</div>');
+				
 				$('#btn-next').click(e => {
-					if (i == features.length) i = 0;
-					$("#popup").find('span').get(5).innerHTML = (i + 1) + '/' + features.length;
-					formatDescription($('#popup'), features[i++]);
+					if (i == features.length - 1) i = -1;
+					formatDescription($('#popup'), features[++i]);
+					appendPageCount();
 				});
+				
+				$('#btn-prev').click(e => {
+					if (i == 0) i = features.length;
+					formatDescription($('#popup'), features[--i]);
+					appendPageCount();
+				});
+			}
+			else {
+				$("#popup").find('.page-count').hide();
 			}
 		}
 
 		function createModal(features) {
 			var i = 0;
+			
+			function appendPageCount() {
+				$("#card-info").find('.card-title').append('<span class="page-count"> (' + (i + 1) + '/' + features.length + ')</span>');
+			}
 
-			formatDescription($('#card-info'), features[i++]);
+			formatDescription($('#card-info'), features[i]);
 
 			if (features.length > 1) {
-				$("#card-info").find('span').get(5).innerHTML = i + '/' + features.length;
-				$('#modal-btn-next').show();
+				appendPageCount()
+				$('#modal-btn-group').show();
+				$("#card-info").find('.page-count').show();
+				
 				$('#modal-btn-next').click(e => {
-					if (i == features.length) i = 0;
-					$("#card-info").find('span').get(5).innerHTML = (i + 1) + '/' + features.length;
-					formatDescription($('#card-info'), features[i++]);
+					if (i == features.length - 1) i = -1;
+					formatDescription($('#card-info'), features[++i]);
+					appendPageCount()
+				});
+				
+				$('#modal-btn-prev').click(e => {
+					if (i == 0) i = features.length;
+					formatDescription($('#card-info'), features[--i]);
+					appendPageCount()
 				});
 			}
 			else {
 				$('#modal-btn-next').hide();
+				$("#card-info").find('.page-count').hide();
 			}
 
 			$('#card-info').modal('show');
@@ -206,7 +249,7 @@
 		function updateSearchDropDown() {
 			const keyword = $('#form-search > input')[0].value;
 
-			if (keyword != '' && keyword.length >= 2) {
+			if (keyword != '' && keyword.length >= 1) {
 				// Generate the search results and hide the dropdown list in case there's no matches
 				results = searchByKeyword(keyword)
 				if (results.length == 0) {
@@ -337,6 +380,8 @@
 
         $('#btn-group-switch-lang').find('.btn').click(function (e) {
 			// Toggles the language
+			$('#modal-btn-next').text(FeatureText.next());
+			$('#modal-btn-prev').text(FeatureText.prev());
             if ($('#option-cn')[0].checked) {
                 lang = 0;
 				$('#form-search > .form-control')[0].placeholder = '搜索';
@@ -402,6 +447,15 @@
 						return "下一个";
 					case 1:
 						return "Next";
+				}
+			}
+			
+			static prev() {
+				switch (lang) {
+					case 0:
+						return "上一个";
+					case 1:
+						return "Previous";
 				}
 			}
 

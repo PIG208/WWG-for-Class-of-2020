@@ -3,6 +3,10 @@ body {
     padding: 0;
 }
 
+div, span, li {
+	font-family: sans-serif;
+}
+
 #map {
     position: absolute;
     top: 10vh;
@@ -70,6 +74,15 @@ body {
 
 .card-modal {
     min-width: unset;
+}
+
+.card-title-container {
+	display: flex;
+	flex-grow: 1;
+}
+
+.card-title-container > .card-title {
+	margin-right: auto;
 }
 		
 #btn-next {
