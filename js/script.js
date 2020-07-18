@@ -415,10 +415,10 @@
 		$('#btn-list-display').click(function(e){
 			if($('#btn-list-display')[0].ariaPressed == 'false'){
 				updateNameCards();
-				$('#list-display').css('margin-top', 0);
+				$('#list-display').fadeIn(250);
 			}
 			else{
-				$('#list-display').css('margin-top', '-90vh');
+				$('#list-display').fadeOut(250);
 			}
 		});
 		
@@ -434,7 +434,7 @@
 			$('#tag-selection > .tag').remove();
 			
 			for(var i = 0; i < properties.length; i++){
-				if($('#list-display > .tag[data-property="' + properties[i].property + '"]').length > 0){
+				if($('#list-display > .tags-container > .tag[data-property="' + properties[i].property + '"]').length > 0){
 					continue;
 				}
 				var tagElement = '<div class="tag" data-property="' + properties[i].property + '" data-property-name="' + $element.attr('data-property-name') + '"><span>'
@@ -550,6 +550,7 @@
 				}
 			}
 			
+			// Returns a sorted array consist of a certain list of properties and the corresponding count of features having the property among the given features
 			static getPropertiesFromFeatures(features, propertyName){
 				var properties = [];
 				var propertiesDict = {};
