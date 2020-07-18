@@ -12,14 +12,14 @@ app.get('/', (req, res) => {
 
 app.get('/studentInfo', (req, res) => {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-	return res.sendFile(path.join(__dirname, 'studentInfo_new.csv'));
+	return res.sendFile(path.join(__dirname, 'studentInfo_latest.csv'));
 });
 
 app.get('/verification', (req, res) => {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
 	console.log(req.query.code);
 	if(true || req.query.code == 'testcode'){
-		return res.sendFile(path.join(__dirname, 'studentInfo_new.csv'));
+		return res.sendFile(path.join(__dirname, 'studentInfo_latest.csv'));
 	}
 	else{
 		res.status(403);

@@ -8,6 +8,7 @@ div, span, li {
 }
 
 #map {
+	z-index: 0;
     position: absolute;
     top: 10vh;
     bottom: 0;
@@ -38,7 +39,8 @@ div, span, li {
 /* Navbar styling*/
 
 .navbar {
-    min-height: 10vh;
+	z-index: 200;
+    height: 10vh;
 }
 
 .navbar-container {
@@ -117,6 +119,160 @@ div, span, li {
     text-align: center;
 }
 
+/* List display styling */
+#btn-list-display {
+    display: none;
+	z-index: 200;
+	position: fixed;
+	bottom: 2.5rem;
+	left: 2.5rem;
+	padding: 0 0 0 0;
+	height: 3rem;
+	width: 3rem;
+	line-height: 3rem;
+	text-align: center;
+	border-radius: 50%;
+	cursor: pointer;
+	transition: background-color 0.15s;
+}
+
+#list-display {
+	z-index:100;
+	position: fixed;
+	top: 10vh;
+	height: 90vh;
+	overflow-y: scroll;
+	margin-top: -90vh;
+	padding: .5rem 1rem;
+	width: 100%;
+	background-color: rgba(255, 255, 255, 0.96);
+	transition: margin-top ease-in-out 0.5s;
+}
+
+/* Tag selection styling*/
+
+.tags-container > div {
+	vertical-align: middle;
+}
+	
+.tag {
+	display: inline-block;
+    position: relative;
+    height: 2.4rem;
+    min-width: 4rem;
+    max-width: 100%;
+    padding: 0.2rem 1.75rem;
+    margin: 0.25rem 0.1rem;
+    text-align: left;
+    line-height: 2rem;
+    border-radius: 2rem;
+    background-color: #28a745;
+    color: white;
+}
+
+	.tag:before {
+		position: absolute;
+		top: 1rem;
+		left: 0.65rem;
+		height: 0.5rem;
+		width: 0.5rem;
+		border-radius: 50%;
+		background-color: white;
+		content: '';
+	}
+
+	
+	.btn-remove-tag  {
+		position: absolute;
+		top: 0.65rem;
+		right: 0.5rem;
+		height: 1rem;
+		width: 1rem;
+		border-radius: 50%;
+		font-size: 1rem;
+		line-height: 1rem;
+		text-align: center;
+		color: white;
+		cursor: pointer;
+	}
+
+.tag > span {
+	display: inline-block;
+    white-space: nowrap;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    max-width: 100%;
+}
+
+ .tag-active {
+	 background-color: #007bff;
+ }
+ 
+ .tag-active .badge {
+	 background-color: #28a745;
+ }
+ 
+	.tag-active:hover {
+		background-color: #004da0 !important;
+	}
+ 
+ #tag-selection {
+	 max-height: 50vh;
+	 overflow-y: scroll;
+ }
+ 
+.tags-container-selectable > .tag, #btn-add-tag{
+	border: none;
+	cursor: pointer;
+	transition: background-color ease-in-out 0.25s;
+
+}
+
+	.tags-container-selectable > .tag:hover {
+		background-color: #1e8034;
+	}
+	
+	.tags-container-selectable > .tag:active {
+		background-color: #276b36;
+	}
+
+#btn-add-tag {
+	background-color: #007bff;
+    user-select: none;
+}
+
+	#btn-add-tag:hover {
+		background-color: #005fc5;
+	}
+	
+	#btn-add-tag:active {
+		background-color: #004fa5;
+	}
+	
+	.tags-container-selectable > .tag:after, #btn-add-tag:before, #btn-add-tag:after {
+		display:none;
+	}
+
+/* Name card styling*/
+.name-card{
+	display: inline-block;
+	box-shadow: 4px 4px 10px 0px grey;
+	margin: 1rem 1rem;
+	min-width: 20vw;
+}
+
+@media(max-width: 767px) {
+	.name-card {
+		display: block;
+		margin: 1rem 0;
+		width: 100%;
+	}
+	
+	#names-view {
+		padding: 1rem 1rem;
+	}
+}
+
 /* Popup styling */
 
 .mapboxgl-popup {
@@ -175,6 +331,10 @@ div, span, li {
     z-index: 500;
     bottom: 2.5rem;
     right: 2.5rem;
+}
+
+.btn-success {
+	opacity: 0.8
 }
 
 .fa {

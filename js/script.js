@@ -16,6 +16,7 @@
 		var map;
 		var studentInfo = [];
 		var popup = new mapboxgl.Popup({ closeOnMove: true, closeOnClick: true })
+		var dataReceived = false;
 
 		$(document).ready(function () {
 
@@ -32,9 +33,12 @@
 						dataType: 'text',
 						data: param,
 						success: function (csvData) {
-							initialize(csvData);
-							$('#verification').modal('hide');
-							$('#overlay').show();
+							if(!dataReceived){
+								dataReceived = true;
+								initialize(csvData);
+								$('#verification').modal('hide');
+								$('#overlay').show();
+							}
 						},
 						error: function (res) {
 							$('#form-verification > input').val('');
@@ -52,7 +56,7 @@
 					container: 'map', // container id
 					style: 'mapbox://styles/mapbox/streets-v11', //stylesheet location
 					center: [114.121677, 22.551557], // starting position
-					zoom: 4,// starting zoom
+					zoom: -2,// starting zoom
 					transformRequest: transformRequest
 				});
 				map.dragRotate.disable();
@@ -76,8 +80,8 @@
 								'data': data
 							},
 							'paint': {
-								'circle-radius': 10,
-								'circle-color': "purple"
+								'circle-radius': 7,
+								'circle-color': "rgba(106,0,210,0.48)"
 							}
 						});
 
@@ -87,6 +91,13 @@
 							//studentInfo[(feature['properties']['Name'])] = feature;
 							studentInfo.push(feature);
 						});
+						
+						function normalize(v) {
+							// Quadratic function that maps map zoom level ranges in [-2, 22] to the radius of the circle ranges in [7, 12]
+							return -0.0086 * Math.pow(v - 22, 2) + 11.5
+						}
+						
+						map.on('zoom',function(e){e.target.setPaintProperty('csvData','circle-radius',normalize(e.target.getZoom()));});
 
 						map.on('mouseover', 'csvData', function (e) { createPopup(e.features); });
 
@@ -104,6 +115,7 @@
 						});
 
                         $('#overlay').fadeOut();
+                        $('#btn-list-display').show();
                         $('#btn-group-switch-lang').show();
 
 					});
@@ -150,8 +162,8 @@
 				$('#popup').append(
 				'<div class="btn-group">'
 					+'<button id="btn-prev" class="btn btn-primary">' 
+						+ '<i class="fa fa-angle-left"></i>' 
 						+ FeatureText.prev()
-						+ '<i class="fa fa-angle-right"></i>' 
 					+ '</button>'
 					+ '<button id="btn-next" class="btn btn-primary">' 
 						+ FeatureText.next()
@@ -203,7 +215,7 @@
 				});
 			}
 			else {
-				$('#modal-btn-next').hide();
+				$('#modal-btn-group').hide();
 				$("#card-info").find('.page-count').hide();
 			}
 
@@ -238,7 +250,9 @@
 		$('#form-search').submit(function (e) {
 			e.preventDefault();
 			const keyword = $('#form-search > input')[0].value;
-			var info = searchByKeyword(keyword, 1)[0]?.value;
+			if(searchByKeyword(keyword, 1)[0] != undefined){
+				var info = searchByKeyword(keyword, 1)[0].value;
+			}
 			if (info != undefined) {
 				$('#form-search > input')[0].value = '';
 				jumpTo(info);
@@ -320,7 +334,9 @@
 				var matchedPattern;
 				// Iterate through each key-value pair studentInfo contains
 				for (key in studentInfo[i].properties) {
-					infoText = studentInfo[i].properties[key]?.toLowerCase();
+					if(studentInfo[i].properties[key] != undefined){
+						infoText = studentInfo[i].properties[key].toLowerCase();
+					}
 					var matchResult = (infoText != undefined) ? PinyinMatch.match(infoText, keyword) : false;
 					if (infoText != undefined && (infoText.indexOf(keyword) != -1 || matchResult)) {
 						var aliases = studentInfo[i].properties[key].split(';');
@@ -358,10 +374,12 @@
 
 		function keyNameToFA(keyName) {
 			switch (keyName) {
+				case 'School':
 				case 'SchoolCN':
 				case 'SchoolLong':
 				case 'SchoolShort':
 					return '<i class="fa fa-university"></i>';
+				case 'Major':
 				case 'MajorCN':
 				case 'MajorEN':
 					return '<i class="fa fa-book"></i>';
@@ -393,9 +411,170 @@
                 $('#form-search > .input-group-append > .btn').text('Search');
             }
 		});
+		
+		$('#btn-list-display').click(function(e){
+			if($('#btn-list-display')[0].ariaPressed == 'false'){
+				updateNameCards();
+				$('#list-display').css('margin-top', 0);
+			}
+			else{
+				$('#list-display').css('margin-top', '-90vh');
+			}
+		});
+		
+		$('#btn-add-tag').click(function(e){
+			$('#tag-dropdown-menu-link').text(FeatureText.chooseFilter());
+			$('#tag-selection > .tag').remove();
+		});
+		
+		$('#tag-dropdown-menu > .dropdown-item').click(function(e){
+			$('#tag-dropdown-menu-link').text($(e.target).text());
+			var $element = $getTarget('dropdown-item', e.target);
+			var properties = FeatureText.getPropertiesFromFeatures(studentInfo, $element.attr('data-property-name'));
+			$('#tag-selection > .tag').remove();
+			
+			for(var i = 0; i < properties.length; i++){
+				if($('#list-display > .tag[data-property="' + properties[i].property + '"]').length > 0){
+					continue;
+				}
+				var tagElement = '<div class="tag" data-property="' + properties[i].property + '" data-property-name="' + $element.attr('data-property-name') + '"><span>'
+										+ keyNameToFA($element.attr('data-property-name'))
+										+ properties[i].property
+										+ '<span class="badge badge-primary badge-pill">' + properties[i].count + '</span>'
+									+ '</span></div>'
+				$('#tag-selection').append(tagElement);
+			}
+			
+			// Triggered when the user clicks on the tags
+			$('#tag-selection > .tag').click(function(e){
+				var $element = $getTarget('tag', e.target);
+				
+				if($element.hasClass('tag-active')){
+					$element.removeClass('tag-active');
+				}
+				else {
+					$element.addClass('tag-active');
+				}
+			});
+		});
+		
+		$('#btn-add-tag-selection').click(function(e){
+			$('#tag-selection > .tag-active').each((index, ele) => {
+				$(ele).removeClass('tag-active');
+				if($('#list-display > .tags-container > .tag[data-property="' + $(ele).attr('data-property') + '"]').length == 0){
+					$(ele).find('.badge').remove();
+					$(ele).off('click');
+					$(ele).append('<span class="btn-remove-tag">x</span>');
+					$('#btn-add-tag').before(ele);
+					$('#modal-tag-selection').modal('hide');
+				}
+			});
+			updateNameCards();
+		});
+		
+		$(document).on('click', '.btn-remove-tag', function(e){
+			$(e.target).parent().remove();
+			updateNameCards();
+		});
+		
+		function $getTarget(className, ele){
+			// Make sure the tag element is selected
+			$element = $(ele);
+			while(!$element.hasClass(className) && $element[0] != $('body')[0]){
+				$element = $element.parent();
+			}
+			return $element;
+		}
+		
+		function updateNameCards(){
+			$('#names-view .name-card').remove();
+			var propertyFilters = {};
+			var filtersNameList = [];
+			$('#list-display .tag').each((i, element) => {
+				const propertyName = $(element).attr('data-property-name')
+				const property = $(element).attr('data-property')
+				if(propertyName != undefined && property != undefined){
+					if(propertyFilters[propertyName] == undefined){
+						propertyFilters[propertyName] = [];
+						filtersNameList.push(propertyName);
+					}
+					propertyFilters[propertyName].push(property);
+				}
+			});
+			console.log(propertyFilters, filtersNameList);
+			
+			studentInfo.forEach(feature => {
+				var filtersSatisfied = 0;
+				filtersNameList.forEach(name => {
+					if(propertyFilters[name].some(propertyFilter => {
+						return (FeatureText.propertyNameToFunc(name))(feature) == propertyFilter;
+					})){
+						console.log(name + "is satisfied");
+						filtersSatisfied++;
+					}
+				});
+				if(filtersSatisfied == filtersNameList.length){
+					temp = '<div class="card name-card">'
+								+ '<div class="card-body">'
+									+ '<div class="card-title-container">'
+										+ '<h5 class="card-title"></h5>'
+									+ '</div>'
+									+ '<ul style="list-style:none; padding-left:0">'
+										+ '<li>' + '<i class="fa fa-university"></i><span></span></li>'
+										+ '<li>' + '<i class="fa fa-book"></i><span></span></li>'
+										+ '<li>' + '<i class="fa fa-phone"></i><span></span></li>'
+										+ '<li>' + '<i class="fa fa-wechat"></i><span></span></li>'
+										+ '<li>' + '<i class="fa fa-home"></i><span></span></li>'
+									+ '</ul>'
+								+ '</div>'
+							+ '</div>';
+
+					$('#names-view').append(formatDescription($(temp), feature));
+					//$('#names-view').append('<div class="name-card tag">' + FeatureText.name(feature) + '</div>');
+				}
+			});
+		}
 
 		// class with static functions to display text according to current language setting
 		class FeatureText {
+			
+			static propertyNameToFunc(propertyName){
+				switch(propertyName){
+					case 'Class':
+						return FeatureText.class_;
+						break;
+					case 'School':
+						return FeatureText.school;
+						break;
+					case 'Major':
+						return FeatureText.major;
+						break;
+					case ''
+				}
+			}
+			
+			static getPropertiesFromFeatures(features, propertyName){
+				var properties = [];
+				var propertiesDict = {};
+				var getText = FeatureText.propertyNameToFunc(propertyName);
+				
+				for(var i = 0; i < features.length; i++){
+					if(getText(features[i]).trim() == '') continue;
+					if(propertiesDict[getText(features[i])] >= 0){
+						// If the given property exisits in the records
+						const index = propertiesDict[getText(features[i])];
+						properties[index]['count']++;
+					}
+					else {
+						propertiesDict[getText(features[i])] = properties.length;
+						properties.push({'property': getText(features[i]), 'count': 1}, );
+					}
+					properties.push();
+				}
+				properties.sort((a, b) => (Math.sign(b.count - a.count)));
+				
+				return properties;
+			}
 
 			static name(feature) {
 				switch (lang) {
@@ -456,6 +635,15 @@
 						return "上一个";
 					case 1:
 						return "Previous";
+				}
+			}
+			
+			static chooseFilter() {
+				switch(lang){
+					case 0:
+						return "选择分类";
+					case 1:
+						return "Choose a filter";
 				}
 			}
 
