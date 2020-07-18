@@ -501,7 +501,6 @@
 					propertyFilters[propertyName].push(property);
 				}
 			});
-			console.log(propertyFilters, filtersNameList);
 			
 			studentInfo.forEach(feature => {
 				var filtersSatisfied = 0;
@@ -509,7 +508,6 @@
 					if(propertyFilters[name].some(propertyFilter => {
 						return (FeatureText.propertyNameToFunc(name))(feature) == propertyFilter;
 					})){
-						console.log(name + "is satisfied");
 						filtersSatisfied++;
 					}
 				});
@@ -549,7 +547,6 @@
 					case 'Major':
 						return FeatureText.major;
 						break;
-					case ''
 				}
 			}
 			
