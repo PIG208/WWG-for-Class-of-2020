@@ -1,10 +1,16 @@
 //'use strict'
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const app = express();
 
 const port = 2323;
 const hostname = 'localhost';
+
+fs.readFile('login-info.csv', (err, data) => {
+	console.log(err);
+});
+
 app.get('/', (req, res) => {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
 	return res.sendFile(path.join(__dirname, 'index.html'));
@@ -19,6 +25,21 @@ app.get('/verification', (req, res) => {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
 	console.log(req.query.code);
 	if(true || req.query.code == 'testcode'){
+		return res.sendFile(path.join(__dirname, 'studentInfo_latest.csv'));
+	}
+	else{
+		res.status(403);
+		return res.send('Wrong verification code.');
+	}
+});
+
+app.get('/verificationStu', (req, res) => {
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+	console.log(req.query.name);
+	console.log(req.query.studentNum);
+	const studentNumDict = {'李子轩':'2017530770'};
+	if(studentNumDict[req.query.name] == req.query.studentNum){
+		console.log('matched');
 		return res.sendFile(path.join(__dirname, 'studentInfo_latest.csv'));
 	}
 	else{

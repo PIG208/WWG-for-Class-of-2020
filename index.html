@@ -55,12 +55,26 @@
 					<h5 class="modal-title">身份验证</h5>
 				</div>
 				<div class="modal-body">
-					<form id="form-verification" class="input-group">
-						<input type="password" class="form-control" placeholder="输入访问密码" />
-						<div class="input-group-append">
-							<button type="submit" class="btn btn-primary" onclick="return void 0;">验证</button>
+					<form id="form-verification" class="collapse multi-collapse">
+						<div class="form-group">
+							<label for="input-name">密码</label>
+							<input id="input-password" type="password" class="form-control" placeholder="输入访问密码" />
 						</div>
 					</form>
+					<form id="form-verification-student" class="collapse multi-collapse show">
+						<div class="form-group">
+							<label for="input-name">姓名</label>
+							<input id="input-name" type="input" class="form-control" placeholder="输入访问姓名" />
+						</div>
+						<div class="form-group">
+							<label for="input-student-number">学号</label>
+							<input id="input-student-number" type="password" class="form-control" placeholder="输入访问学号" />
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-info" data-toggle="collapse" data-target="#form-verification, #form-verification-student">切换验证方式</button>
+					<button id="btn-verification" class="btn btn-primary">验证</button>
 				</div>
 			</div>
 		</div>
@@ -125,6 +139,30 @@
 			</div>
 		</div>
 	</div>
+	<div id="modal-helper" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 id="modal-add-tag-title" class="card-title">帮助</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						&times;
+					</button>
+				</div>
+				<div class="modal-body">
+					<ul style="list-style:decimal">
+						<li>点击<i class="fa fa-bars"></i>可查看通讯录</li>
+						<li>在搜索框里输入关键词，例如输入“NYU”搜索所有在NYU上学的同学</li>
+						<li>点击右下角按钮可以切换中文/英文</li>
+						<li>点击<i class="fa fa-map"></i>查看Where We Go 2020静态地图，查看同学们的毕业去向</li>
+						<li>(Gapping)/(Deferring)标签表示这位同学在2020-2021学年中</li>
+						<li>如需更新个人信息，请联系微信jychen630</li>
+						<li>投诉与建议，请联系微信jychen630</li>
+						<li>注：本地图为不完全统计，个人信息以自愿为原则采集</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
 	<div id="modal-confirm" class="modal fade" role="dialog">
 		<div class="modal-dialog modal-sm">
 			<div class="modal-content">
@@ -143,14 +181,19 @@
 			<div id="btn-add-tag" class="tag" data-toggle="modal" data-target="#modal-tag-selection"><span><i class="fa fa-plus"></i><span>筛选</span></span></div>	
 		</div>
 		<div id="name-scroll"></div>
-		<p id="list-hint">点击名字查看详情</p>
+		<p id="list-hint">点击名字查看个人名片</p>
 		<div id="names-view" class="name-card-container">
 		</div>
 	</div>
-	<div id="btn-list-display" class="btn btn-success" data-toggle="button" aria-pressed="false">
+	<div id="btn-list-display" class="btn btn-success bubble" data-toggle="button" aria-pressed="false">
 		<i class="fa fa-bars"></i>
 	</div>
-	
+	<div id="btn-helper" class="btn btn-success bubble" data-toggle="modal" data-target="#modal-helper">
+		<i class="fa fa-info"></i>
+	</div>
+	<div id="btn-show-map" class="btn btn-success bubble" data-toggle="modal" data-target="#modal-helper">
+		<i class="fa fa-map"></i>
+	</div>
 	<div id="btn-group-switch-lang">
 		<div class="btn-group btn-group-toggle" data-toggle="buttons">
 			<label class="btn btn-success">

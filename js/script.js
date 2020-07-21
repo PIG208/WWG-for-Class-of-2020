@@ -21,15 +21,32 @@
 		$(document).ready(function () {
 
 			$("#verification").modal('show');
-
-			$('#form-verification').submit(function (e) {
+			
+			$('#form-verification, #form-verification-student').submit(function(e){
+				console.log('test');
 				e.preventDefault();
-				const param = { code: $('#form-verification > input').val().trim() };
+				$('#btn-verification').click();
+			})
+			
+			$('#btn-verification').click(function (e) {
+				e.preventDefault();
+				var param, url;
+				if($('#form-verification-student').hasClass('show')){
+					url = 'verificationStu';
+					param = {
+						name: $('#input-name').val().trim(),
+						studentNum: $('#input-student-number').val().trim(),
+					};
+				}
+				else{
+					url = 'verification';
+					param = { code: $('#input-password').val().trim() };
+				}
 
 				if (param['code'] != "") {
 					$.ajax({
 						type: 'GET',
-						url: 'verification',
+						url: url,
 						dataType: 'text',
 						data: param,
 						success: function (csvData) {
@@ -41,9 +58,9 @@
 							}
 						},
 						error: function (res) {
-							$('#form-verification > input').val('');
+							$('#form-verification input, #form-verification-student input').val('');
 							$('#msg-wrong').remove();
-							$('#verification').find('.modal-body').prepend('<p id="msg-wrong">访问密码错误</p>');
+							$('#verification').find('.modal-body').prepend('<p id="msg-wrong">访问信息错误</p>');
 							$('#msg-wrong').animate({ 'opacity': 1 }, 500)
 						}
 					});
@@ -116,7 +133,7 @@
 						});
 
                         $('#overlay').fadeOut();
-                        $('#btn-list-display').show();
+                        $('.bubble').show();
                         $('#btn-group-switch-lang').show();
 
 					});
@@ -227,7 +244,19 @@
 		//You can adjust the values of the popup to match the headers of your CSV.
 		// For example: e.features[0].properties.Name is retrieving information from the field Name in the original CSV.
 		function formatDescription(element, feature) {
-			element.find('h5').text(FeatureText.name(feature));
+			if(parseInt(feature.properties.IsGap) >= 1){
+				switch(parseInt(feature.properties.IsGap)){
+					case 1:
+						element.find('h5').text(FeatureText.name(feature) + ' (Gapping)');
+						break;
+					case 2:
+						element.find('h5').text(FeatureText.name(feature) + ' (Deferring)');
+						break;
+				}
+			}
+			else {
+				element.find('h5').text(FeatureText.name(feature));	
+			}
 			element.find('span').get(0).innerHTML = FeatureText.school(feature);
 			element.find('span').get(1).innerHTML = FeatureText.major(feature);
 			element.find('span').get(2).innerHTML = FeatureText.phone(feature);
@@ -256,7 +285,7 @@
 			e.preventDefault();
 			const keyword = $('#form-search > input')[0].value;
 			if(searchByKeyword(keyword, 1)[0] != undefined){
-				var info = searchByKeyword(keyword, 1)[0].value;
+				var info = searchByKeyword(keyword, 5)[0].value;
 			}
 			if (info != undefined) {
 				$('#form-search > input')[0].value = '';
@@ -404,51 +433,52 @@
 		var trigger = false;
 
         $(document).on('mouseup', '#btn-group-switch-lang .btn', function (e) {
-			console.log('triggerred');
 			langRefresh();
 		});
 		
 		function langRefresh(){
+			console.log($('#list-display').css('display') == 'none',$('#list-display').css('display'));
 			// Toggles the language
 			if($('#list-display').css('display') == 'none' || $('#list-display > .tags-container > .tag').length == 1 || forceSwitch){
-				$('#modal-btn-next').text(FeatureText.next());
-				$('#modal-btn-prev').text(FeatureText.prev());
-				if ($('#option-cn')[0].checked) {
-					lang = 0;
-					$('#form-search > .form-control')[0].placeholder = '请输入关键词';
-					$('#form-search > .input-group-append > .btn').text('搜索');
-				}
-				else if ($('#option-en')[0].checked) {
-					lang = 1;
-					$('#form-search > .form-control')[0].placeholder = 'Search';
-					$('#form-search > .input-group-append > .btn').text('Search');
-				}
-				if(forceSwitch){
-					$('#list-display > .tags-container > .tag').each((i, tag) => {
-						if(tag != $('#btn-add-tag')[0]){
-							$(tag).remove();
-						}
-					});
-				}
-				updateListDisplay();
-				forceSwitch = false;
-				$('#tag-dropdown-menu-link').text(FeatureText.chooseFilter());
-				$('#btn-add-tag > span > span').text(FeatureText.filter());
-				$('#list-hint').text(FeatureText.listHintMsg());
-				$('#add-tag-hint').text(FeatureText.addTagHintMsg());
-				$('#modal-add-tag-title').text(FeatureText.modalAddTagTitleMsg());
-				$('#modal-confirm-hint').text(FeatureText.modalConfirmHintMsg());
-				$('.feature-text-confirm').text(FeatureText.confirm());
-				$('.feature-text-cancel').text(FeatureText.cancel());
-				$('#tag-dropdown-menu > .dropdown-item[data-property-name="School"] > span').text(FeatureText.filterSchool());
-				$('#tag-dropdown-menu > .dropdown-item[data-property-name="Major"] > span').text(FeatureText.filterMajor());
-				$('#tag-dropdown-menu > .dropdown-item[data-property-name="Class"] > span').text(FeatureText.filterClass());
-				$('#tag-dropdown-menu > .dropdown-item[data-property-name="CountryRegion"] > span').text(FeatureText.filterCountryRegion());
-				$('#tag-dropdown-menu > .dropdown-item[data-property-name="Region"] > span').text(FeatureText.filterRegion());
-				$('#tag-dropdown-menu > .dropdown-item[data-property-name="City"] > span').text(FeatureText.filterCity());
+				setTimeout(function(e){
+					$('#modal-btn-next').text(FeatureText.next());
+					$('#modal-btn-prev').text(FeatureText.prev());
+					if ($('#option-cn')[0].checked) {
+						lang = 0;
+						$('#form-search > .form-control')[0].placeholder = '请输入关键词';
+						$('#form-search > .input-group-append > .btn').text('搜索');
+					}
+					else if ($('#option-en')[0].checked) {
+						lang = 1;
+						$('#form-search > .form-control')[0].placeholder = 'Search';
+						$('#form-search > .input-group-append > .btn').text('Search');
+					}
+					if(forceSwitch){
+						$('#list-display > .tags-container > .tag').each((i, tag) => {
+							if(tag != $('#btn-add-tag')[0]){
+								$(tag).remove();
+							}
+						});
+					}
+					updateListDisplay();
+					forceSwitch = false;
+					$('#tag-dropdown-menu-link').text(FeatureText.chooseFilter());
+					$('#btn-add-tag > span > span').text(FeatureText.filter());
+					$('#list-hint').text(FeatureText.listHintMsg());
+					$('#add-tag-hint').text(FeatureText.addTagHintMsg());
+					$('#modal-add-tag-title').text(FeatureText.modalAddTagTitleMsg());
+					$('#modal-confirm-hint').text(FeatureText.modalConfirmHintMsg());
+					$('.feature-text-confirm').text(FeatureText.confirm());
+					$('.feature-text-cancel').text(FeatureText.cancel());
+					$('#tag-dropdown-menu > .dropdown-item[data-property-name="School"] > span').text(FeatureText.filterSchool());
+					$('#tag-dropdown-menu > .dropdown-item[data-property-name="Major"] > span').text(FeatureText.filterMajor());
+					$('#tag-dropdown-menu > .dropdown-item[data-property-name="Class"] > span').text(FeatureText.filterClass());
+					$('#tag-dropdown-menu > .dropdown-item[data-property-name="CountryRegion"] > span').text(FeatureText.filterCountryRegion());
+					$('#tag-dropdown-menu > .dropdown-item[data-property-name="Region"] > span').text(FeatureText.filterRegion());
+					$('#tag-dropdown-menu > .dropdown-item[data-property-name="City"] > span').text(FeatureText.filterCity());
+				}, 0);
 			}
 			else {
-				
 				$('#modal-confirm').modal('show');
 			}
 		}
@@ -694,7 +724,8 @@
 					case 0:
 						return feature.properties.NameCN;
 					case 1:
-						return feature.properties.NameEN;
+						const name = feature.properties.NameEN;
+						return name.slice(name.indexOf(' ') + 1) + ', ' + name.slice(0, name.indexOf(' '));
 				}
 			}
 
@@ -799,9 +830,9 @@
 			static listHintMsg() {
 				switch(lang){
 					case 0:
-						return "点击名字查看详情";
+						return "点击名字查看个人名片";
 					case 1:
-						return "Click on one of the names for more info.";
+						return "Click on names to view personal profile.";
 				}
 			}
 			
@@ -810,7 +841,7 @@
 					case 0:
 						return "点击选择要添加的标签";
 					case 1:
-						return "Click on one of the tags to add.";
+						return "Click on tags to add.";
 				}
 			}
 			

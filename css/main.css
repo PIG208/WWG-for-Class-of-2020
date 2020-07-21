@@ -3,8 +3,12 @@ body {
     padding: 0;
 }
 
-div, span, li {
+* {
 	font-family: sans-serif;
+}
+
+.fa {
+	text-align: center;
 }
 
 #map {
@@ -125,11 +129,22 @@ div, span, li {
 
 /* List display styling */
 #btn-list-display {
+	bottom: 2.5rem;
+}
+
+#btn-helper {
+	bottom: 6rem;
+}
+
+#btn-show-map {
+	bottom: 9.5rem;
+}
+
+.bubble {
     display: none;
+	left: 2.5rem;
 	z-index: 200;
 	position: fixed;
-	bottom: 2.5rem;
-	left: 2.5rem;
 	padding: 0 0 0 0;
 	height: 3rem;
 	width: 3rem;
