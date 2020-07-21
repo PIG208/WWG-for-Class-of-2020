@@ -23,7 +23,6 @@
 			$("#verification").modal('show');
 			
 			$('#form-verification, #form-verification-student').submit(function(e){
-				console.log('test');
 				e.preventDefault();
 				$('#btn-verification').click();
 			})
@@ -437,7 +436,6 @@
 		});
 		
 		function langRefresh(){
-			console.log($('#list-display').css('display') == 'none',$('#list-display').css('display'));
 			// Toggles the language
 			if($('#list-display').css('display') == 'none' || $('#list-display > .tags-container > .tag').length == 1 || forceSwitch){
 				setTimeout(function(e){

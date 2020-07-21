@@ -40,6 +40,10 @@ body {
     width: 120px;
 }
 
+.modal-header {
+	padding: 1rem 1rem 0.5rem;
+}
+
 /* Navbar styling*/
 
 .navbar {
@@ -406,6 +410,21 @@ body {
 
 .mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
     border-bottom-color: rgb(61, 59, 59);
+}
+
+/* Helper styling */
+#modal-helper ul {
+	list-style:decimal;
+	line-height:1.5rem;
+	padding-right:2rem;
+}
+
+#modal-helper li {
+	margin-bottom: 1rem;
+}
+
+#modal-helper .fa {
+	color:#28a745;
 }
 
 /* Other styling */
