@@ -7,8 +7,12 @@ const app = express();
 const port = 2323;
 const hostname = 'localhost';
 
-fs.readFile('login-info.csv', (err, data) => {
-	console.log(err);
+const content = fs.readFileSync('login-info.csv', 'utf8');
+var studentNumDict = {};
+const data = content.split('\r\n').slice(1).forEach(line => {
+	console.log(line);
+	const temp = line.split(',');
+	studentNumDict[temp[0]] = temp[1];
 });
 
 app.get('/', (req, res) => {
@@ -35,9 +39,6 @@ app.get('/verification', (req, res) => {
 
 app.get('/verificationStu', (req, res) => {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-	console.log(req.query.name);
-	console.log(req.query.studentNum);
-	const studentNumDict = {'李子轩':'2017530770'};
 	if(studentNumDict[req.query.name] == req.query.studentNum){
 		console.log('matched');
 		return res.sendFile(path.join(__dirname, 'studentInfo_latest.csv'));
