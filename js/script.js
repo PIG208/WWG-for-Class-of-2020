@@ -27,9 +27,19 @@
 				$('#btn-verification').click();
 			})
 			
+			if($.cookie('password') != undefined){
+				const param = { code: $.cookie('password')};
+				ajaxVerify('verification', param);
+			}
+			if($.cookie('name') != undefined && $.cookie('studentNum') != undefined){
+				const param = { name: $.cookie('name'), studentNum: $.cookie('studentNum')};
+				ajaxVerify('verificationStu', param);
+			}
+			
 			$('#btn-verification').click(function (e) {
 				e.preventDefault();
 				var param, url;
+				
 				if($('#form-verification-student').hasClass('show')){
 					url = 'verificationStu';
 					param = {
@@ -41,30 +51,35 @@
 					url = 'verification';
 					param = { code: $('#input-password').val().trim() };
 				}
-
-				if (param['code'] != "") {
-					$.ajax({
-						type: 'GET',
-						url: url,
-						dataType: 'text',
-						data: param,
-						success: function (csvData) {
-							if(!dataReceived){
-								dataReceived = true;
-								initialize(csvData);
-								$('#verification').modal('hide');
-								$('#overlay').show();
-							}
-						},
-						error: function (res) {
-							$('#form-verification input, #form-verification-student input').val('');
-							$('#msg-wrong').remove();
-							$('#verification').find('.modal-body').prepend('<p id="msg-wrong">访问信息错误</p>');
-							$('#msg-wrong').animate({ 'opacity': 1 }, 500)
-						}
-					});
-				}
+				
+				ajaxVerify(url, param);
 			});
+			
+			function ajaxVerify(url, param){
+				$.ajax({
+					type: 'GET',
+					url: url,
+					dataType: 'text',
+					data: param,
+					success: function (csvData) {
+						if(!dataReceived){
+							dataReceived = true;
+							$.cookie('password', param['code']);
+							$.cookie('name', param['name']);
+							$.cookie('studentNum', param['studentNum']);
+							initialize(csvData);
+							$('#verification').modal('hide');
+							$('#overlay').show();
+						}
+					},
+					error: function (res) {
+						$('#form-verification input, #form-verification-student input').val('');
+						$('#msg-wrong').remove();
+						$('#verification').find('.modal-body').prepend('<p id="msg-wrong">访问信息错误</p>');
+						$('#msg-wrong').animate({ 'opacity': 1 }, 500)
+					}
+				});
+			}
 
 			function initialize(csvData) {
 				//Mapbox token

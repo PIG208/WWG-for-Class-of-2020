@@ -16,6 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>-->
 	<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdn.bootcdn.net/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script src="mapbox-gl.js"></script>
     <link href="mapbox-gl.css" rel="stylesheet"></link>
     <script src='csv2geojson.js'></script>
@@ -140,7 +141,7 @@
 		</div>
 	</div>
 	<div id="modal-helper" class="modal fade">
-		<div class="modal-dialog">
+		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 id="modal-add-tag-title" class="card-title">帮助</h5>
@@ -160,6 +161,21 @@
 						<li>本地图为不完全统计，个人信息以自愿为原则采集</li>
 						<li>投诉与建议，请联系微信jychen630</li>
 					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="modal-map" class="modal fade" role="dialog">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 id="modal-add-tag-title" class="card-title">毕业地图</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						&times;
+					</button>
+				</div>
+				<div class="modal-body">
+					<a href="map.png"><img src="map.png"></img></a>
 				</div>
 			</div>
 		</div>
@@ -192,7 +208,7 @@
 	<div id="btn-helper" class="btn btn-success bubble" data-toggle="modal" data-target="#modal-helper">
 		<i class="fa fa-info"></i>
 	</div>
-	<div id="btn-show-map" class="btn btn-success bubble" data-toggle="modal" data-target="#modal-helper">
+	<div id="btn-show-map" class="btn btn-success bubble" data-toggle="modal" data-target="#modal-map">
 		<i class="fa fa-map"></i>
 	</div>
 	<div id="btn-group-switch-lang">

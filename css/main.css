@@ -427,6 +427,12 @@ body {
 	color:#28a745;
 }
 
+/* Modal map styling*/
+
+#modal-map img {
+	width:100%;
+}
+
 /* Other styling */
 
 #list-hint {
