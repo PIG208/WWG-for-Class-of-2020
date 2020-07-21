@@ -30,12 +30,12 @@
 
 <body lang="zh-cn">
 	<nav class="navbar navbar-expand-md navbar-light bg-light">
-		<a class="navbar-brand">Where We Go for 2020</a>
+		<a class="navbar-brand"><img src="logo2.png" alt="Where We Go for 2020"></img></a>
 		<div class="navbar-container">
 			<ul class="navbar-nav mr-auto mt-2 mt-md-0"></ul>
 			<div class="search-container">
 				<form id="form-search" class="input-group my-2 my-lg-0" onsubmit="return void 0;">
-					<input class="form-control" type="search" placeholder="搜索">
+					<input class="form-control" type="search" placeholder="请输入关键词">
 					<div id="search-dropdown" class="dropdown-menu"></div>
 					<div class="input-group-append">
 						<button type="submit" class="btn btn-outline-success">搜索</button>
@@ -94,7 +94,7 @@
 		<div class="modal-dialog modal-dialog-centered modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="card-title">添加标签</h5>
+					<h5 id="modal-add-tag-title" class="card-title">添加标签</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						&times;
 					</button>
@@ -105,27 +105,45 @@
 							选择分类
 						</a>
 						<div id="tag-dropdown-menu" class="dropdown-menu" aria-labelledby="tag-dropdown-menu-link">
-							<a class="dropdown-item" data-property-name="School" href="#"><i class="fa fa-university"></i>学校</a>
-							<a class="dropdown-item" data-property-name="Major" href="#"><i class="fa fa-book"></i>专业</a>
-							<a class="dropdown-item" data-property-name="Class" href="#"><i class="fa fa-home"></i>班级</a>
+							<a class="dropdown-item" data-property-name="School" href="#"><i class="fa fa-university"></i><span>学校</span></a>
+							<a class="dropdown-item" data-property-name="Major" href="#"><i class="fa fa-book"></i><span>专业</span></a>
+							<a class="dropdown-item" data-property-name="Class" href="#"><i class="fa fa-home"></i><span>班级</span></a>
+							<a class="dropdown-item" data-property-name="CountryRegion" href="#"><i class="fa fa-map-pin"></i><span>国家/地区</span></a>
+							<a class="dropdown-item" data-property-name="Region" href="#"><i class="fa fa-map"></i><span>州/郡/省</span></a>
+							<a class="dropdown-item" data-property-name="City" href="#"><i class="fa fa-building"></i><span>城市</span></a>
 						</div>
 					</div>
 					<hr>
-					<p>点击选择要添加的标签</p>
+					<p id="add-tag-hint">点击选择要添加的标签</p>
 					<div id="tag-selection" class="tags-container tags-container-selectable">
 					</div>
 				</div>
 				<div id="modal-btn-group" class="btn-group">
-					<button class="btn btn-secondary" data-dismiss="modal">取消</button>
-					<button id="btn-add-tag-selection" class="btn btn-primary">确定</button>
+					<button class="btn btn-secondary feature-text-cancel" data-dismiss="modal">取消</button>
+					<button id="btn-add-tag-selection" class="btn btn-primary feature-text-confirm">确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="modal-confirm" class="modal fade" role="dialog">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-body">
+					<p id="modal-confirm-hint">切换语言会清除现有的标签，是否继续？</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary feature-text-cancel" data-dismiss="modal">取消</button>
+					<button id="btn-modal-confirm" type="button" class="btn btn-primary feature-text-confirm" onclick="forceSwitch=false;">确定</button>
 				</div>
 			</div>
 		</div>
 	</div>
 	<div id="list-display">
 		<div class="tags-container">
-			<div id="btn-add-tag" class="tag" data-toggle="modal" data-target="#modal-tag-selection"><span><i class="fa fa-plus"></i>添加</span></div>	
+			<div id="btn-add-tag" class="tag" data-toggle="modal" data-target="#modal-tag-selection"><span><i class="fa fa-plus"></i><span>筛选</span></span></div>	
 		</div>
+		<div id="name-scroll"></div>
+		<p id="list-hint">点击名字查看详情</p>
 		<div id="names-view" class="name-card-container">
 		</div>
 	</div>

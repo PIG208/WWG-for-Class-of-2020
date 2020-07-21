@@ -54,13 +54,14 @@
 				//Mapbox token
 				map = new mapboxgl.Map({
 					container: 'map', // container id
-					style: 'mapbox://styles/mapbox/streets-v11', //stylesheet location
+					style: 'mapbox://styles/mapbox/streets-v8', //stylesheet location
 					center: [114.121677, 22.551557], // starting position
 					zoom: -2,// starting zoom
 					transformRequest: transformRequest
 				});
 				map.dragRotate.disable();
 				map.touchZoomRotate.disableRotation();
+				updateNameScroll();
 				makeGeoJSON(csvData);
 			}
 
@@ -245,6 +246,10 @@
 		$("#form-search > input").on('keyup', function (e) {
 			updateSearchDropDown();
 		});
+		
+		$("#form-search > input").on('focus', function (e) {
+			updateSearchDropDown();
+		});
 
 		// By submitting a search action without selecting displayed choices, the user will be guided to the most possible choice
 		$('#form-search').submit(function (e) {
@@ -260,10 +265,10 @@
 		});
 
 		// Update the dropdown list according to the keyword
-		function updateSearchDropDown() {
+		function updateSearchDropDown() {  
 			const keyword = $('#form-search > input')[0].value;
 
-			if (keyword != '' && keyword.length >= 1) {
+			if (keyword != undefined && keyword.length > 0) {
 				// Generate the search results and hide the dropdown list in case there's no matches
 				results = searchByKeyword(keyword)
 				if (results.length == 0) {
@@ -395,29 +400,101 @@
 
 		// 0 for Chinese, 1 for English
 		var lang = 0
+		var forceSwitch = false;
+		var trigger = false;
 
-        $('#btn-group-switch-lang').find('.btn').click(function (e) {
+        $(document).on('mouseup', '#btn-group-switch-lang .btn', function (e) {
+			console.log('triggerred');
+			langRefresh();
+		});
+		
+		function langRefresh(){
 			// Toggles the language
-			$('#modal-btn-next').text(FeatureText.next());
-			$('#modal-btn-prev').text(FeatureText.prev());
-            if ($('#option-cn')[0].checked) {
-                lang = 0;
-				$('#form-search > .form-control')[0].placeholder = '搜索';
-				$('#form-search > .input-group-append > .btn').text('搜索');
+			if($('#list-display').css('display') == 'none' || $('#list-display > .tags-container > .tag').length == 1 || forceSwitch){
+				$('#modal-btn-next').text(FeatureText.next());
+				$('#modal-btn-prev').text(FeatureText.prev());
+				if ($('#option-cn')[0].checked) {
+					lang = 0;
+					$('#form-search > .form-control')[0].placeholder = '请输入关键词';
+					$('#form-search > .input-group-append > .btn').text('搜索');
+				}
+				else if ($('#option-en')[0].checked) {
+					lang = 1;
+					$('#form-search > .form-control')[0].placeholder = 'Search';
+					$('#form-search > .input-group-append > .btn').text('Search');
+				}
+				if(forceSwitch){
+					$('#list-display > .tags-container > .tag').each((i, tag) => {
+						if(tag != $('#btn-add-tag')[0]){
+							$(tag).remove();
+						}
+					});
+				}
+				updateListDisplay();
+				forceSwitch = false;
+				$('#tag-dropdown-menu-link').text(FeatureText.chooseFilter());
+				$('#btn-add-tag > span > span').text(FeatureText.filter());
+				$('#list-hint').text(FeatureText.listHintMsg());
+				$('#add-tag-hint').text(FeatureText.addTagHintMsg());
+				$('#modal-add-tag-title').text(FeatureText.modalAddTagTitleMsg());
+				$('#modal-confirm-hint').text(FeatureText.modalConfirmHintMsg());
+				$('.feature-text-confirm').text(FeatureText.confirm());
+				$('.feature-text-cancel').text(FeatureText.cancel());
+				$('#tag-dropdown-menu > .dropdown-item[data-property-name="School"] > span').text(FeatureText.filterSchool());
+				$('#tag-dropdown-menu > .dropdown-item[data-property-name="Major"] > span').text(FeatureText.filterMajor());
+				$('#tag-dropdown-menu > .dropdown-item[data-property-name="Class"] > span').text(FeatureText.filterClass());
+				$('#tag-dropdown-menu > .dropdown-item[data-property-name="CountryRegion"] > span').text(FeatureText.filterCountryRegion());
+				$('#tag-dropdown-menu > .dropdown-item[data-property-name="Region"] > span').text(FeatureText.filterRegion());
+				$('#tag-dropdown-menu > .dropdown-item[data-property-name="City"] > span').text(FeatureText.filterCity());
 			}
-            else if ($('#option-en')[0].checked) {
-                lang = 1;
-                $('#form-search > .form-control')[0].placeholder = 'Search';
-                $('#form-search > .input-group-append > .btn').text('Search');
-            }
+			else {
+				
+				$('#modal-confirm').modal('show');
+			}
+		}
+		
+		$('#modal-confirm').on('hide.bs.modal', function(e) {
+			if(!forceSwitch) {
+				if($('#btn-group-switch-lang .btn').first().hasClass('active')){
+					$($('#btn-group-switch-lang .btn')[1]).click();
+				}
+				else {
+					$('#btn-group-switch-lang .btn').first().click();
+				}
+			}
+		});
+		
+		$('#map').click(function(e) {
+			$('#search-dropdown').fadeOut();
+		});
+		
+		$('#btn-modal-confirm').click(function(e) {
+			forceSwitch = true;
+			$('#modal-confirm').modal('hide');
+			$('#btn-group-switch-lang > btn').each(btn => {
+				if($(btn).hasClass('active')){
+					$(btn).removeClass('active');
+					$(btn).find('input').checked = false;
+				}
+				else {
+					$(btn).addClass('active');
+					$(btn).find('input').checked = true;
+				}
+			});
+			langRefresh();
 		});
 		
 		$('#btn-list-display').click(function(e){
-			if($('#btn-list-display')[0].ariaPressed == 'false'){
-				updateNameCards();
+			if($('#list-display').css('display') == 'none'){
+				updateListDisplay();
+				$('#search-dropdown').fadeOut();
+				$('#form-search input')[0].disabled = true;
+				$('#form-search button')[0].disabled = true;
 				$('#list-display').fadeIn(250);
 			}
 			else{
+				$('#form-search input')[0].disabled = false;
+				$('#form-search button')[0].disabled = false;
 				$('#list-display').fadeOut(250);
 			}
 		});
@@ -469,13 +546,27 @@
 					$('#modal-tag-selection').modal('hide');
 				}
 			});
-			updateNameCards();
+			updateListDisplay();
 		});
 		
 		$(document).on('click', '.btn-remove-tag', function(e){
 			$(e.target).parent().remove();
-			updateNameCards();
+			updateListDisplay();
 		});
+		
+		$(document).on('click', '.name-card', function(e){
+			const index = parseInt($getTarget('name-card', e.target).attr('data-feature-index'));
+			createModal(studentInfo.slice(index, index + 1));
+		});
+		
+		$(document).on('mouseover', '#name-scroll > div', function(e){
+			var $target = $('#names-view > .divider:contains("' + $(e.target).text() + '")');
+			if($target.length > 0){
+				$('#list-display').stop();
+				$('#list-display').animate({'scrollTop':$('#list-display').scrollTop() + $target.offset().top - parseFloat($(window).height())/10},100);
+			}		
+		});
+		
 		
 		function $getTarget(className, ele){
 			// Make sure the tag element is selected
@@ -486,8 +577,20 @@
 			return $element;
 		}
 		
-		function updateNameCards(){
-			$('#names-view .name-card').remove();
+		function updateNameScroll() {
+			$('#name-scroll > div').remove();
+			const h = parseInt($('#name-scroll').css('height'))/26;
+			for(var i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++){
+				if($('#names-view > .divider:contains("' + String.fromCharCode(i) + '")').length > 0){
+					var $temp = $('<div>' + String.fromCharCode(i) + '</div>');
+					$('#name-scroll').append($temp);
+				}
+			}
+			$('#name-scroll > div').css('height',  parseFloat($('#name-scroll').css('height'))/$('#name-scroll > div').length + 'px');
+		}
+		
+		function updateListDisplay(){
+			$('#names-view .name-card,.divider').remove();
 			var propertyFilters = {};
 			var filtersNameList = [];
 			$('#list-display .tag').each((i, element) => {
@@ -502,7 +605,8 @@
 				}
 			});
 			
-			studentInfo.forEach(feature => {
+			var alphaOrder = 'a'.charCodeAt(0);
+			studentInfo.forEach((feature, index) => {
 				var filtersSatisfied = 0;
 				filtersNameList.forEach(name => {
 					if(propertyFilters[name].some(propertyFilter => {
@@ -511,26 +615,28 @@
 						filtersSatisfied++;
 					}
 				});
+				function matchFirstLetter(str, letter){
+						const result = PinyinMatch.match(str, letter)
+						return result != false && result[0] == 0;
+				}
 				if(filtersSatisfied == filtersNameList.length){
-					temp = '<div class="card name-card">'
-								+ '<div class="card-body">'
-									+ '<div class="card-title-container">'
-										+ '<h5 class="card-title"></h5>'
-									+ '</div>'
-									+ '<ul style="list-style:none; padding-left:0">'
-										+ '<li>' + '<i class="fa fa-university"></i><span></span></li>'
-										+ '<li>' + '<i class="fa fa-book"></i><span></span></li>'
-										+ '<li>' + '<i class="fa fa-phone"></i><span></span></li>'
-										+ '<li>' + '<i class="fa fa-wechat"></i><span></span></li>'
-										+ '<li>' + '<i class="fa fa-home"></i><span></span></li>'
-									+ '</ul>'
-								+ '</div>'
+					const name = feature.properties.NameCN;
+					if(alphaOrder == 'a'.charCodeAt(0) || !(matchFirstLetter(name, String.fromCharCode(alphaOrder)))){
+						for(;alphaOrder <= 'z'.charCodeAt(0); alphaOrder++){
+							if(matchFirstLetter(name, String.fromCharCode(alphaOrder))){
+								$('#names-view').append('<div class="divider">' + String.fromCharCode(alphaOrder).toUpperCase() +'<span></span></div>');
+								break;
+							}
+						}
+					}
+					temp = '<div class="name-card" data-feature-index=' + index + '>'
+										+ FeatureText.name(feature)
 							+ '</div>';
-
-					$('#names-view').append(formatDescription($(temp), feature));
+					$('#names-view').append(temp);
 					//$('#names-view').append('<div class="name-card tag">' + FeatureText.name(feature) + '</div>');
 				}
 			});
+			updateNameScroll()
 		}
 
 		// class with static functions to display text according to current language setting
@@ -546,6 +652,15 @@
 						break;
 					case 'Major':
 						return FeatureText.major;
+						break;
+					case 'CountryRegion':
+						return FeatureText.countryRegion;
+						break;
+					case 'Region':
+						return FeatureText.region;
+						break;
+					case 'City':
+						return FeatureText.city;
 						break;
 				}
 			}
@@ -617,7 +732,34 @@
 						return feature.properties.MajorEN;
 				}
 			}
-
+			
+			static countryRegion(feature) {
+				switch (lang) {
+					case 0:
+						return feature.properties.CountryRegionCN;
+					case 1:
+						return feature.properties.CountryRegionEN;
+				}
+			}
+			
+			static region(feature) {
+				switch (lang) {
+					case 0:
+						return feature.properties.RegionCN;
+					case 1:
+						return feature.properties.RegionEN;
+				}
+			}
+			
+			static city(feature) {
+				switch (lang) {
+					case 0:
+						return feature.properties.CityCN;
+					case 1:
+						return feature.properties.CityEN;
+				}
+			}
+			
 			static next() {
 				switch (lang) {
 					case 0:
@@ -642,6 +784,132 @@
 						return "选择分类";
 					case 1:
 						return "Choose a filter";
+				}
+			}
+			
+			static filter() {
+				switch(lang){
+					case 0:
+						return "筛选";
+					case 1:
+						return "Filter";
+				}
+			}
+
+			static listHintMsg() {
+				switch(lang){
+					case 0:
+						return "点击名字查看详情";
+					case 1:
+						return "Click on one of the names for more info.";
+				}
+			}
+			
+			static addTagHintMsg() {
+				switch(lang){
+					case 0:
+						return "点击选择要添加的标签";
+					case 1:
+						return "Click on one of the tags to add.";
+				}
+			}
+			
+			static modalConfirmHintMsg() {
+				switch(lang){
+					case 0:
+						return "切换语言会清除现有的标签，是否继续？";
+					case 1:
+						return "Switching language will remove every filter. Continue?";
+				}
+			}
+			
+			static modalAddTagTitleMsg() {
+				switch(lang){
+					case 0:
+						return "添加标签";
+					case 1:
+						return "Add Filter"
+				}
+			}
+			
+			static filterSchool(){
+				switch(lang){
+					case 0:
+						return "学校";
+					case 1:
+						return "School";
+				}
+			}
+			
+			static filterMajor(){
+				switch(lang){
+					case 0:
+						return "专业";
+					case 1:
+						return "Major";
+				}
+			}
+			
+			static filterClass(){
+				switch(lang){
+					case 0:
+						return "班级";
+					case 1:
+						return "Class";
+				}
+			}
+			
+			static filterCountryRegion(){
+				switch(lang){
+					case 0:
+						return "国家/地区";
+					case 1:
+						return "Country/Region";
+				}
+			}
+			
+			static filterRegion(){
+				switch(lang){
+					case 0:
+						return "州/郡/省";
+					case 1:
+						return "Region";
+				}
+			}
+			
+			static filterCity(){
+				switch(lang){
+					case 0:
+						return "城市";
+					case 1:
+						return "City";
+				}
+			}
+			
+			static filterSchool(){
+				switch(lang){
+					case 0:
+						return "学校";
+					case 1:
+						return "School";
+				}
+			}
+			
+			static cancel() {
+				switch(lang){
+					case 0:
+						return "取消";
+					case 1:
+						return "Cancel";
+				}
+			}
+			
+			static confirm() {
+				switch(lang){
+					case 0:
+						return "确定";
+					case 1:
+						return "Confirm";
 				}
 			}
 

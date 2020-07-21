@@ -43,6 +43,10 @@ div, span, li {
     height: 10vh;
 }
 
+.navbar-brand > img {
+	height: 10vh;
+}
+
 .navbar-container {
     display: flex;
     flex-grow: 1;
@@ -142,10 +146,10 @@ div, span, li {
 	position: fixed;
 	top: 10vh;
 	height: 90vh;
+	width: 100%;
 	overflow-y: scroll;
 	padding: .5rem 1rem;
-	width: 100%;
-	background-color: rgba(255, 255, 255, 0.96);
+	background-color: rgba(255, 255, 255, 1);
 	transition: margin-top ease-in-out 0.5s;
 }
 
@@ -195,6 +199,12 @@ div, span, li {
 		color: white;
 		cursor: pointer;
 	}
+
+.tag .badge {
+	font-size: .75rem;
+	margin-left: .5rem;
+	font-weight: 500;
+}
 
 .tag > span {
 	display: inline-block;
@@ -256,22 +266,82 @@ div, span, li {
 /* Name card styling*/
 .name-card{
 	display: inline-block;
-	box-shadow: 4px 4px 10px 0px grey;
+	vertical-align: top;
 	margin: 1rem 1rem;
-	min-width: 20vw;
 }
 
-@media(max-width: 767px) {
+.name-card {
+	display: inline-block;
+    height: 3rem;
+    min-width: 3rem;
+    max-width: 100%;
+    margin: 0.25rem 0.1rem;
+	padding: .75rem;
+	font-size: 1rem;
+	text-align: center;
+    background-color: rgba(255, 255, 255, 0);
+	transition: background-color 0.15s linear;
+    color: black;
+	cursor: pointer;
+}
+
+	.name-card:hover {
+		background-color: #cccccc;
+	}
+
+.name-card ul {
+	display: none;
+}
+
+#names-view {
+	padding-right: 2rem;
+	padding-bottom: 10vh;
+}
+
+@media(max-width: 575px) {
 	.name-card {
 		display: block;
-		margin: 1rem 0;
+		margin: 0 0;
+		border-radius: 0;
 		width: 100%;
 	}
 	
 	#names-view {
 		padding: 1rem 1rem;
+		padding-right: 2rem;
 	}
 }
+
+/* Divier styling*/
+
+.divider {
+	position:relative;
+    width: 100%;
+    top: 0.75rem;
+	color: #dadada;
+    border-bottom: 0.5px #dadada solid;
+    margin-bottom: 1rem;
+}
+
+.divider > span {
+	display: inline-block;
+}
+
+/* Name scroll styling */
+
+#name-scroll {
+    position: fixed;
+	text-align: center;
+    right: 1rem;
+    height: 80vh;
+    width: 2rem;	
+	color: grey;
+	cursor: pointer;
+}
+
+	#name-scroll > div:hover{
+		color: #dcdcdc;
+	}
 
 /* Popup styling */
 
@@ -324,6 +394,10 @@ div, span, li {
 }
 
 /* Other styling */
+
+#list-hint {
+	color: grey;
+}
 
 #btn-group-switch-lang {
     display: none;
