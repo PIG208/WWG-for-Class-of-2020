@@ -13,11 +13,32 @@ body {
 
 #map {
 	z-index: 0;
-    position: absolute;
-    top: 10vh;
-    bottom: 0;
+    position: relative;
     width: 100%;
-    height: 90%;
+	height: calc(100vh - 5rem);
+}
+
+footer {
+	position: absolute;
+	bottom: 0;
+	right: 0.5rem;
+	font-size: 0.5rem;
+	color: grey;
+}
+
+.mapboxgl-ctrl-bottom-right {
+	bottom: 1rem;
+}
+
+@media(max-width: 640px) {
+	.mapboxgl-ctrl-bottom-right {
+		bottom: .5rem;
+	}
+}
+
+.mapbox-canvas {
+	position: relative;
+	height: calc(100vh - 5rem)!important;
 }
 
 /* Loading screen styling*/
@@ -48,11 +69,12 @@ body {
 
 .navbar {
 	z-index: 200;
-    height: 10vh;
+    height: 5rem;
+	position: relative;
 }
 
 .navbar-brand > img {
-	height: 10vh;
+	height: 4.5rem;
 }
 
 .navbar-container {
@@ -162,9 +184,9 @@ body {
 #list-display {
 	display: none;
 	z-index:100;
-	position: fixed;
-	top: 10vh;
-	height: 90vh;
+	position: absolute;
+	top: 5rem;
+	height: calc(100vh - 5rem);
 	width: 100%;
 	overflow-y: scroll;
 	padding: .5rem 1rem;
@@ -352,14 +374,18 @@ body {
     position: fixed;
 	text-align: center;
     right: 1rem;
-    height: 80vh;
+    height: 70vh;
     width: 2rem;	
 	color: grey;
 	cursor: pointer;
 }
 
+	#name-scroll > div{
+			user-select: none;
+	}
+	
 	#name-scroll > div:hover{
-		color: #dcdcdc;
+		color: #28a745;
 	}
 
 /* Popup styling */

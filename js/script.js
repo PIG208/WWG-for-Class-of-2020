@@ -64,9 +64,14 @@
 					success: function (csvData) {
 						if(!dataReceived){
 							dataReceived = true;
-							$.cookie('password', param['code']);
-							$.cookie('name', param['name']);
-							$.cookie('studentNum', param['studentNum']);
+							if($.cookie('password') == undefined && $.cookie('name') == undefined && $.cookie('studentNum') == undefined){
+								$('#modal-helper').modal('show');
+							}
+							if($('#check-remember-password')[0].checked){
+								$.cookie('password', param['code']);
+								$.cookie('name', param['name']);
+								$.cookie('studentNum', param['studentNum']);
+							}
 							initialize(csvData);
 							$('#verification').modal('hide');
 							$('#overlay').show();
@@ -131,7 +136,7 @@
 						
 						map.on('zoom',function(e){e.target.setPaintProperty('csvData','circle-radius',normalize(e.target.getZoom()));});
 
-						map.on('mouseover', 'csvData', function (e) { createPopup(e.features); });
+						map.on('mouseenter', 'csvData', function (e) { createPopup(e.features, e); });
 
 						map.on('touchstart', 'csvData', function (e) { createModal(e.features); });
 
@@ -157,7 +162,7 @@
 		});
 
 		// Create a popup on the destinated point
-		function createPopup(features) {
+		function createPopup(features, e=undefined) {
 			var coordinates = features[0].geometry.coordinates.slice();
 			var i = 0;
 			function appendPageCount(){
@@ -180,6 +185,12 @@
 				+ '</div>';
 
 			var description = formatDescription($(temp), features[i])[0].outerHTML;
+
+			if(e != undefined){
+				while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+					coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+				}	
+			}
 
 			// Add Popup to map
 			popup.setLngLat(coordinates)
@@ -481,8 +492,12 @@
 					$('#add-tag-hint').text(FeatureText.addTagHintMsg());
 					$('#modal-add-tag-title').text(FeatureText.modalAddTagTitleMsg());
 					$('#modal-confirm-hint').text(FeatureText.modalConfirmHintMsg());
+					$('#upcoming-feature-hint').text(FeatureText.upcomingFeatureHintMsg());
 					$('.feature-text-confirm').text(FeatureText.confirm());
 					$('.feature-text-cancel').text(FeatureText.cancel());
+					$('#helper-msg')[0].innerHTML = FeatureText.helperMsg();
+					$('#modal-helper-title').text(FeatureText.helperTitle());
+					$('#modal-map-title').text(FeatureText.modalMapTitle());
 					$('#tag-dropdown-menu > .dropdown-item[data-property-name="School"] > span').text(FeatureText.filterSchool());
 					$('#tag-dropdown-menu > .dropdown-item[data-property-name="Major"] > span').text(FeatureText.filterMajor());
 					$('#tag-dropdown-menu > .dropdown-item[data-property-name="Class"] > span').text(FeatureText.filterClass());
@@ -592,6 +607,8 @@
 			updateListDisplay();
 		});
 		
+		$(window).on('resize', function(e){updateNameScroll()});
+		
 		$(document).on('click', '.btn-remove-tag', function(e){
 			$(e.target).parent().remove();
 			updateListDisplay();
@@ -602,13 +619,34 @@
 			createModal(studentInfo.slice(index, index + 1));
 		});
 		
-		$(document).on('mouseover', '#name-scroll > div', function(e){
-			var $target = $('#names-view > .divider:contains("' + $(e.target).text() + '")');
+		var touching = false;
+		
+		$(document).on('touchstart', '#name-scroll > div', function(e) {
+			touching = true;
+			moveToDivider(e.target);
+		});
+		
+		$(document).on('touchend', '#name-scroll', function(e) {
+			touching = false;
+		});
+		
+		$(document).on('touchmove', '#name-scroll > div', function(e){
+			if(touching){
+				moveToDivider(e.target);
+			}
+		});
+		
+		$(document).on('mousedown', '#name-scroll > div', function(e){
+			moveToDivider(e.target);
+		});
+		
+		function moveToDivider(nameScrollElement) {
+			var $target = $('#names-view > .divider:contains("' + $(nameScrollElement).text() + '")');
 			if($target.length > 0){
 				$('#list-display').stop();
 				$('#list-display').animate({'scrollTop':$('#list-display').scrollTop() + $target.offset().top - parseFloat($(window).height())/10},100);
-			}		
-		});
+			}
+		}
 		
 		
 		function $getTarget(className, ele){
@@ -622,7 +660,6 @@
 		
 		function updateNameScroll() {
 			$('#name-scroll > div').remove();
-			const h = parseInt($('#name-scroll').css('height'))/26;
 			for(var i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++){
 				if($('#names-view > .divider:contains("' + String.fromCharCode(i) + '")').length > 0){
 					var $temp = $('<div>' + String.fromCharCode(i) + '</div>');
@@ -873,6 +910,58 @@
 						return "添加标签";
 					case 1:
 						return "Add Filter"
+				}
+			}
+			
+			static upcomingFeatureHintMsg() {
+				switch(lang) {
+					case 0:
+						return "该功能暂未开放，敬请期待";
+					case 1:
+						return "Coming soon...";
+				}
+			}
+			
+			static helperMsg() {
+				switch(lang){
+					case 0:
+						return '<li>点击<i class="fa fa-bars"></i>可查看通讯录</li>'
+						+ '<li>在搜索框里输入关键词，例如输入“NYU”搜索所有在NYU上学的同学</li>'
+						+ '<li>点击右下角按钮可以切换中文/英文</li>'
+						+ '<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向</li>'
+						+ '<li>(Gapping)/(Deferring)标签表示这位同学在2020-2021学年中Gap/Defer</li>'
+						+ '<li>如需更新个人信息，请联系微信jychen630</li>'
+						+ '<li>未决定学校去向的同学暂时定位于深圳，如需更新信息，请参考上条</li>'
+						+ '<li>本地图为不完全统计，个人信息以自愿为原则采集</li>'
+						+ '<li>投诉与建议，请联系微信jychen630</li>';
+					case 1:
+						return '<li>Click on<i class="fa fa-bars"></i>to view all contacts</li>'
+								+ '<li>Type in key words to search specific contacts; e.g Type in "NYU" to search all students going to NYU</li>'
+								+ '<li>Click the "中/EN" buttom in the bottom right corner to switch languages</li>'
+								+ '<li>Click on<i class="fa fa-map"></i>to view<i>Where We Go 2020</i>&nbspstatic map and check where everyone goes to</li>'
+								+ '<li>(Gapping)/(Deferring) labels the students who gap/defer the 2020-2021 school year</li>'
+								+ '<li>Zoom in the map to view precise location of institutions (within city)</li>'
+								+ '<li>Locations of students not yet made a decision are temporarily set as Shenzhen</li>'
+								+ '<li>All Infomation are collected with full free will, and are presented with grant in advance</li>'
+								+ '<li>To update your infomation (such as schools or gapping/deferring status), share advice or make complaint, please contact Jaelyn Chen (WeChat ID jychen630)</li>';
+				}
+			}
+			
+			static helperTitle() {
+				switch(lang) {
+					case 0:
+						return "帮助";
+					case 1:
+						return "Help";
+				}
+			}
+			
+			static modalMapTitle() {
+				switch(lang) {
+					case 0:
+						return "毕业地图";
+					case 1:
+						return "Graduation Map";
 				}
 			}
 			
