@@ -65,7 +65,7 @@
 						if(!dataReceived){
 							dataReceived = true;
 							if($.cookie('password') == undefined && $.cookie('name') == undefined && $.cookie('studentNum') == undefined){
-								$('#modal-helper').modal('show');
+								$('#modal-helper').modal('toggle');
 							}
 							if($('#check-remember-password')[0].checked){
 								$.cookie('password', param['code']);
@@ -169,7 +169,7 @@
 				$("#popup").find('.card-title').append('<span class="page-count"> (' + (i + 1) + '/' + features.length + ')</span>');
 			}
 
-			temp = '<div id="popup" class="card">'
+			var $temp = $('<div id="popup" class="card">'
 				+ '<div class="card-body">'
 				+ '<div class="card-title-container">'
 					+ '<h5 class="card-title"></h5>'
@@ -182,9 +182,24 @@
 				+ '<li>' + '<i class="fa fa-home"></i><span></span></li>'
 				+ '</ul>'
 				+ '</div>'
-				+ '</div>';
-
-			var description = formatDescription($(temp), features[i])[0].outerHTML;
+				+ '</div>');
+			
+			if (features.length > 1) {
+				// Add btn group to the popup
+				$temp.append(
+					'<div class="btn-group">'
+						+'<button id="btn-prev" class="btn btn-primary">' 
+							+ '<i class="fa fa-angle-left"></i>' 
+							+ FeatureText.prev()
+						+ '</button>'
+						+ '<button id="btn-next" class="btn btn-primary">' 
+							+ FeatureText.next()
+							+ '<i class="fa fa-angle-right"></i>'
+						+ '</button>'
+					+ '</div>');
+			}
+			
+			var description = formatDescription($temp, features[i])[0].outerHTML;
 
 			if(e != undefined){
 				while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
@@ -200,19 +215,6 @@
 			// When there're multiple people at the same point
 			if (features.length > 1) {
 				appendPageCount();
-				
-				// Add btn group to the popup
-				$('#popup').append(
-				'<div class="btn-group">'
-					+'<button id="btn-prev" class="btn btn-primary">' 
-						+ '<i class="fa fa-angle-left"></i>' 
-						+ FeatureText.prev()
-					+ '</button>'
-					+ '<button id="btn-next" class="btn btn-primary">' 
-						+ FeatureText.next()
-						+ '<i class="fa fa-angle-right"></i>'
-					+ '</button>'
-				+ '</div>');
 				
 				$('#btn-next').click(e => {
 					if (i == features.length - 1) i = -1;
@@ -926,19 +928,19 @@
 				switch(lang){
 					case 0:
 						return '<li>点击<i class="fa fa-bars"></i>可查看通讯录</li>'
-						+ '<li>在搜索框里输入关键词，例如输入“NYU”搜索所有在NYU上学的同学</li>'
-						+ '<li>点击右下角按钮可以切换中文/英文</li>'
-						+ '<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向</li>'
-						+ '<li>(Gapping)/(Deferring)标签标注出了在2020-2021学年中选择Gap/Defer的同学</li>'
-						+ '<li>缩放地图可查看学校在所处城市中的精确定位，这在学校分布密集的城市尤有帮助，例如美国东北部地区</li>'
-						+ '<li>未决定学校去向的同学暂时定位于深圳</li>'
-						+ '<li>本地图为不完全统计，个人信息以自愿为原则采集</li>'
-						+ '<li>如需更新个人信息（如就读学校、休学状态），或者投诉与建议，请联系微信账号jychen630</li>'
+								+ '<li>在搜索框里输入关键词，例如输入“NYU”搜索所有在NYU上学的同学</li>'
+								+ '<li>点击右下角按钮可以切换中文/英文</li>'
+								+ '<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向</li>'
+								+ '<li>(Gapping)/(Deferring)标签标注出了在2020-2021学年中选择Gap/Defer的同学</li>'
+								+ '<li>缩放地图可查看学校在所处城市中的精确定位，这在学校分布密集的城市尤有帮助，例如美国东北部地区</li>'
+								+ '<li>未决定学校去向的同学暂时定位于深圳</li>'
+								+ '<li>本地图为不完全统计，个人信息以自愿为原则采集</li>'
+								+ '<li>如需更新个人信息（如就读学校、休学状态），或者投诉与建议，请联系微信账号jychen630</li>'
 					case 1:
 						return '<li>Click on<i class="fa fa-bars"></i>to view all contacts</li>'
 								+ '<li>Type in key words to search specific contacts; e.g Type in "NYU" to search all students going to NYU</li>'
-								+ '<li>Click the "中/EN" buttom in the bottom right corner to switch languages</li>'
-								+ '<li>Click on<i class="fa fa-map"></i>to view<i>Where We Go 2020</i>&nbspstatic map and check where everyone goes to</li>'
+								+ '<li>Click the "中/EN" button in the bottom right corner to switch languages</li>'
+								+ '<li>Click on<i class="fa fa-map"></i>to view <i>Where We Go 2020</i>&nbspstatic map and check where everyone goes to</li>'
 								+ '<li>(Gapping)/(Deferring) labels the students who gap/defer the 2020-2021 school year</li>'
 								+ '<li>Zoom in the map to view precise location of institutions (within city)</li>'
 								+ '<li>Locations of students not yet made a decision are temporarily set as Shenzhen</li>'

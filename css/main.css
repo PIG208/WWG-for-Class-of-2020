@@ -26,6 +26,10 @@ footer {
 	color: grey;
 }
 
+.modal {
+	overflow-y: auto;
+}
+
 .mapboxgl-ctrl-bottom-right {
 	bottom: 1rem;
 }
