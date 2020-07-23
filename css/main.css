@@ -16,6 +16,7 @@ body {
     position: relative;
     width: 100%;
 	height: calc(100vh - 5rem);
+	height: calc(calc(var(--vh, 1vh) * 100) - 5rem);
 }
 
 footer {
@@ -273,6 +274,7 @@ footer {
  
  #tag-selection {
 	 max-height: 50vh;
+	 max-height: calc(var(--vh, 1vh) * 50);
 	 overflow-y: scroll;
  }
  
@@ -341,6 +343,7 @@ footer {
 #names-view {
 	padding-right: 2rem;
 	padding-bottom: 10vh;
+	padding-bottom: calc(var(--vh, 1vh) * 10);
 }
 
 @media(max-width: 575px) {
@@ -379,6 +382,7 @@ footer {
 	text-align: center;
     right: 1rem;
     height: 70vh;
+    height: calc(var(--vh, 1vh) * 70);
     width: 2rem;	
 	color: grey;
 	cursor: pointer;

@@ -19,6 +19,8 @@
 		var dataReceived = false;
 
 		$(document).ready(function () {
+			
+			$(':root').css({'--vh': window.innerHeight / 100 + 'px'});
 
 			$("#verification").modal('show');
 			
@@ -476,7 +478,7 @@
 					}
 					else if ($('#option-en')[0].checked) {
 						lang = 1;
-						$('#form-search > .form-control')[0].placeholder = 'Search';
+						$('#form-search > .form-control')[0].placeholder = 'Type in keywords';
 						$('#form-search > .input-group-append > .btn').text('Search');
 					}
 					if(forceSwitch){
@@ -494,7 +496,7 @@
 					$('#add-tag-hint').text(FeatureText.addTagHintMsg());
 					$('#modal-add-tag-title').text(FeatureText.modalAddTagTitleMsg());
 					$('#modal-confirm-hint').text(FeatureText.modalConfirmHintMsg());
-					$('#upcoming-feature-hint').text(FeatureText.upcomingFeatureHintMsg());
+					$('#map-download-link-hint').text(FeatureText.mapDownloadLinkHintMsg());
 					$('.feature-text-confirm').text(FeatureText.confirm());
 					$('.feature-text-cancel').text(FeatureText.cancel());
 					$('#helper-msg')[0].innerHTML = FeatureText.helperMsg();
@@ -609,7 +611,11 @@
 			updateListDisplay();
 		});
 		
-		$(window).on('resize', function(e){updateNameScroll()});
+		$(window).on('resize', function(e){
+			updateNameScroll();
+			$(':root').css({'--vh': window.innerHeight / 100 + 'px'});
+			console.log($(':root').css('--vh'));
+		});
 		
 		$(document).on('click', '.btn-remove-tag', function(e){
 			$(e.target).parent().remove();
@@ -915,37 +921,37 @@
 				}
 			}
 			
-			static upcomingFeatureHintMsg() {
+			static mapDownloadLinkHintMsg() {
 				switch(lang) {
 					case 0:
-						return "该功能暂未开放，敬请期待";
+						return "下载原图 (19.6 MB)";
 					case 1:
-						return "Coming soon...";
+						return "Download Full Image (19.6 MB)";
 				}
 			}
 			
 			static helperMsg() {
 				switch(lang){
 					case 0:
-						return '<li>点击<i class="fa fa-bars"></i>可查看通讯录</li>'
-								+ '<li>在搜索框里输入关键词，例如输入“NYU”搜索所有在NYU上学的同学</li>'
-								+ '<li>点击右下角按钮可以切换中文/英文</li>'
-								+ '<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向</li>'
-								+ '<li>(Gapping)/(Deferring)标签标注出了在2020-2021学年中选择Gap/Defer的同学</li>'
-								+ '<li>缩放地图可查看学校在所处城市中的精确定位，这在学校分布密集的城市尤有帮助，例如美国东北部地区</li>'
-								+ '<li>未决定学校去向的同学暂时定位于深圳</li>'
-								+ '<li>本地图为不完全统计，个人信息以自愿为原则采集</li>'
-								+ '<li>如需更新个人信息（如就读学校、休学状态），或者投诉与建议，请联系微信账号jychen630</li>'
+						return '<li>点击<i class="fa fa-bars"></i>可查看完整通讯录；</li>'
+								  + '<li>在搜索框里输入关键词，例如输入“NYU”搜索所有在NYU上学的同学；</li>'
+								  + '<li>点击右下角按钮可以切换中文/英文；</li>'
+								  + '<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向；</li>'
+								  + '<li>(Gapping)/(Deferring)标签标注出了在2020-2021学年中选择Gap/Defer的同学；</li>'
+								  + '<li>缩放地图可查看学校在所处城市中的精确定位，这在学校分布密集的城市尤有帮助，例如美国东北部地区；</li>'
+								  + '<li>未决定学校去向的同学暂时定位于深圳；</li>'
+								  + '<li>本地图为不完全统计，个人信息以自愿为原则采集；</li>'
+								  + '<li>如需更新个人信息（如就读学校、休学状态），或者投诉与建议，请联系微信账号jychen630；</li>';
 					case 1:
-						return '<li>Click on<i class="fa fa-bars"></i>to view all contacts</li>'
-								+ '<li>Type in key words to search specific contacts; e.g Type in "NYU" to search all students going to NYU</li>'
-								+ '<li>Click the "中/EN" button in the bottom right corner to switch languages</li>'
-								+ '<li>Click on<i class="fa fa-map"></i>to view <i>Where We Go 2020</i>&nbspstatic map and check where everyone goes to</li>'
-								+ '<li>(Gapping)/(Deferring) labels the students who gap/defer the 2020-2021 school year</li>'
-								+ '<li>Zoom in the map to view precise location of institutions (within city)</li>'
-								+ '<li>Locations of students not yet made a decision are temporarily set as Shenzhen</li>'
-								+ '<li>All Infomation are collected with full free will, and are presented with grant in advance</li>'
-								+ '<li>To update your infomation (such as schools or gapping/deferring status), share advice or make complaint, please contact Jaelyn Chen (WeChat ID jychen630)</li>';
+						return '<li>Click on<i class="fa fa-bars"></i>to view all contacts.</li>'
+								  + '<li>Type in key words to search specific contacts; e.g Type in "NYU" to search all students going to NYU.</li>'
+								  + '<li>Click the "中/EN" button in the bottom right corner to switch languages.</li>'
+								  + '<li>Click on<i class="fa fa-map"></i>to view&nbsp<i>Where We Go 2020</i>&nbspstatic map and check where everyone goes to.</li>'
+								  + '<li>(Gapping)/(Deferring) labels the students who gap/defer the 2020-2021 school year.</li>'
+								  + '<li>Zoom in the map to view precise location of institutions (within city).</li>'
+								  + '<li>Locations of students not yet made a decision are temporarily set as Shenzhen.</li>'
+								  + '<li>All Infomation are collected with full free will, and are presented with grant in advance.</li>'
+								  + '<li>To update your infomation (such as schools or gapping/deferring status), share advice or make complaint, please contact Jaelyn Chen (WeChat ID jychen630).</li>'
 				}
 			}
 			
