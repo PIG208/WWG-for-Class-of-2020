@@ -4,7 +4,7 @@
 
 <head>
     <meta charset='utf-8' />
-    <title>Where We Go for 2020</title>
+    <title>Where We Go 2020</title>
     <meta name='viewport' content='width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no' />
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js"></script>
@@ -63,6 +63,7 @@
 							<label for="input-name">密码</label>
 							<input id="input-password" type="password" autocomplete="current-password"  class="form-control" placeholder="输入访问密码" />
 						</div>
+						<p>不知道密码？请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630</p>
 					</form>
 					<form id="form-verification-student" class="collapse multi-collapse show">
 						<div class="form-group">
@@ -77,11 +78,12 @@
 					</form>
 					<div class="form-check">
 						<input type="checkbox" class="form-check-input" id="check-remember-password">
-						<label class="form-check-label" for="check-remember-password">记住密码</label>
+						<label class="form-check-label" for="check-remember-password">自动登录</label>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button class="btn btn-info" data-toggle="collapse" data-target="#form-verification, #form-verification-student">切换验证方式</button>
+					<button class="btn btn-info" data-toggle="collapse" onclick="
+						$('#msg-wrong').remove();" data-target="#form-verification, #form-verification-student">切换验证方式</button>
 					<button id="btn-verification" class="btn btn-primary">验证</button>
 				</div>
 			</div>

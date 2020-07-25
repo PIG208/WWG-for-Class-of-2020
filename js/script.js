@@ -82,7 +82,12 @@
 					error: function (res) {
 						$('#form-verification input, #form-verification-student input').val('');
 						$('#msg-wrong').remove();
-						$('#verification').find('.modal-body').prepend('<p id="msg-wrong">访问信息错误</p>');
+						if($('#form-verification-student').hasClass('show')){
+							$('#verification').find('.modal-body').prepend('<p id="msg-wrong">访问信息错误。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630</p>');
+						}
+						else {
+							$('#verification').find('.modal-body').prepend('<p id="msg-wrong">访问信息错误。');
+						}
 						$('#msg-wrong').animate({ 'opacity': 1 }, 500)
 					}
 				});
@@ -908,7 +913,7 @@
 					case 0:
 						return "切换语言会清除现有的标签，是否继续？";
 					case 1:
-						return "Switching language will remove every filter. Continue?";
+						return "Switching language will remove all filters. Continue?";
 				}
 			}
 			

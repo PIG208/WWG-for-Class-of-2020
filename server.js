@@ -28,7 +28,7 @@ app.get('/studentInfo', (req, res) => {
 app.get('/verification', (req, res) => {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
 	console.log(req.query.code);
-	if(true || req.query.code == 'testcode'){
+	if(req.query.code == 'testcode'){
 		return res.sendFile(path.join(__dirname, 'studentInfo_latest.csv'));
 	}
 	else{
