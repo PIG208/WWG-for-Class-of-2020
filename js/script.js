@@ -415,6 +415,19 @@
 								matchedSubstr = aliases[n];
 							}
 						}
+						if(key == 'IsGap'){
+							switch(parseInt(matchedSubstr)){
+								case 0:
+									matchedSubstr = 'Regular';
+									break;
+								case 1:
+									matchedSubstr = 'Gapping';
+									break;
+								case 2:
+									matchedSubstr = 'Deferring';
+									break;
+							}
+						}
 						matchedPattern = { matchedKey: key, matchedSubstr: matchedSubstr };
 						if (infoText == keyword || (matchResult != false && matchResult[1] - matchResult[0] + 1 == infoText.length)) {
 							priority += 999;
