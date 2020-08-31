@@ -4,7 +4,7 @@ CREATE TABLE login_credentials (
 	phone_num VARCHAR(20),
 	seesion_id CHAR(16),
 	expire_date DATETIME
-);
+) CHARACTER SET = "utf8mb4";
 
 CREATE TABLE user_credentials (
 	phone_num VARCHAR(20) NOT NULL,
@@ -13,4 +13,4 @@ CREATE TABLE user_credentials (
 	password_hash CHAR(64),
 	salt CHAR(16),
 	PRIMARY KEY (phone_num)
-);
+) CHARACTER SET = "utf8mb4";
