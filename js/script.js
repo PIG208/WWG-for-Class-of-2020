@@ -17,6 +17,7 @@
 		var studentInfo = [];
 		var popup = new mapboxgl.Popup({ closeOnMove: true, closeOnClick: true })
 		var dataReceived = false;
+		const URL_LOGIN = '/login', URL_SIGNUP = '/signup', URL_CHECK_PHONE_NUM = '/checkPhoneNum', URL_GET_CODE = '/getVerificationCode';
 
 		$(document).ready(function () {
 			
@@ -29,68 +30,221 @@
 				$('#btn-verification').click();
 			})
 			
-			if($.cookie('password') != undefined){
-				const param = { code: $.cookie('password')};
-				ajaxVerify('verification', param);
+			if($.cookie('phoneNum') != undefined && $.cookie('passwordSha') != undefined){
+				const params = { phoneNum: $.cookie('phoneNum'), passwordSha: $.cookie('passwordSha')};
+				ajaxVerify(URL_LOGIN, params);
 			}
-			if($.cookie('name') != undefined && $.cookie('studentNum') != undefined){
-				const param = { name: $.cookie('name'), studentNum: $.cookie('studentNum')};
-				ajaxVerify('verificationStu', param);
+			
+			$('#btn-toggle-verification').click(function (e){
+				if($('#form-signup').hasClass('show')){
+					$('#btn-toggle-verification').text('去注册');
+				}
+				else{
+					$('#btn-toggle-verification').text('去登录');
+				}
+			});
+			
+			$('#btn-send-sms').click(function (e){
+				e.preventDefault();
+				phoneNumLookup($('#input-phone-number-signup').val().trim(), function(status){
+					if(status == 0){
+						var countDown = 60;
+						$('#btn-send-sms')[0].disabled = true;
+						$('#btn-send-sms').text(`发送验证码(${countDown--})`);
+						param = {
+							phoneNum: $('#input-phone-number-signup').val()
+						}
+						$.ajax({
+							type: 'GET',
+							url: URL_GET_CODE,
+							data: param,
+							success: function(result) {
+								console.log(result);
+							}
+						});
+						var smsInterval = setInterval(function(e){
+							if(countDown > 0){
+								$('#btn-send-sms').text(`发送验证码(${countDown})`);
+								countDown--;
+							}
+							else {
+								$('#btn-send-sms')[0].disabled = false;
+								$('#btn-send-sms').text('发送验证码');
+								clearInterval(smsInterval);
+							}
+						}, 1000);
+					}
+				});
+			});
+			
+			function validateForm(){
+				if($('#form-signup').hasClass('show')){
+					if($('#input-phone-number-signup').val().trim() == ''){
+						showError('请输入电话号码');
+					}
+					else if(!validatePhoneNum($('#input-phone-number-signup').val().trim())){
+						showError('请正确输入电话号码');
+					}
+					else if($('#input-password-signup').val() == ''){
+						showError('请输入密码');
+					}
+					else if($('#input-password-confirm').val() == ''){
+						showError('请再次输入密码');
+					}
+					else if($('#input-password-signup').val() != $('#input-password-confirm').val()){
+						showError('两次输入密码不一致');
+					}
+					else if($('#input-verification-code').val() == ''){
+						showError('请输入验证码');
+					}
+					else {
+						showError('');
+						return true;
+					}
+				}
+				else {
+					if($('#input-phone-number-login').val().trim() == ''){
+						showError('请输入电话号码');
+					}
+					else if(!validatePhoneNum($('#input-phone-number-login').val().trim())){
+						showError('请正确输入电话号码');
+					}
+					else if($('#input-password-login').val() == ''){
+						showError('请输入密码');
+					}
+					else {
+						showError('');
+						return true
+					}
+				}
+				return false;
+			}
+			
+			function validatePhoneNum(phoneNum){
+				result = phoneNum.match(/[1-9][0-9]+/);
+				return result != undefined && result[0].length == phoneNum.length;
+			}
+			
+			// Lookup the phone number in the database and gives true to the callback if the phone number is valid.
+			function phoneNumLookup(phoneNum, callback){
+				if(!validatePhoneNum(phoneNum)){
+					showError('请正确输入电话号码');
+				}
+				else{
+					param = {
+						phoneNum: phoneNum
+						}
+					$.ajax({
+						type: 'GET',
+						data: param,
+						url: URL_CHECK_PHONE_NUM,
+						dataType: 'text',
+						success: function(msg){
+							if(msg == '0'){
+								showError('');
+								callback(0);
+							}
+							if(msg == '1'){
+								callback(1);
+							}
+							if(msg == '2'){
+								callback(2);
+							}
+						}
+					});
+				}
 			}
 			
 			$('#btn-verification').click(function (e) {
 				e.preventDefault();
 				var param, url;
-				
-				if($('#form-verification-student').hasClass('show')){
-					url = 'verificationStu';
+				if(validateForm() == false){
+					return;
+				}
+				if($('#form-signup').hasClass('show')){
+					url = URL_SIGNUP;
 					param = {
-						name: $('#input-name').val().trim(),
-						studentNum: $('#input-student-number').val().trim(),
+						phoneNum: $('#input-phone-number-signup').val().trim(),
+						passwordSha: sha256($('#input-password-signup').val()),
+						verificationCode: $('#input-verification-code').val().trim()
 					};
 				}
 				else{
-					url = 'verification';
-					param = { code: $('#input-password').val().trim() };
+					url = URL_LOGIN;
+					param = {
+						phoneNum: $('#input-phone-number-login').val().trim(),
+						passwordSha: sha256($('#input-password-login').val())
+					};
 				}
-				
 				ajaxVerify(url, param);
 			});
 			
-			function ajaxVerify(url, param){
-				$.ajax({
-					type: 'GET',
-					url: url,
-					dataType: 'text',
-					data: param,
-					success: function (csvData) {
-						if(!dataReceived){
-							dataReceived = true;
-							if($.cookie('password') == undefined && $.cookie('name') == undefined && $.cookie('studentNum') == undefined){
-								$('#modal-helper').modal('toggle');
-							}
-							if($('#check-remember-password')[0].checked){
-								$.cookie('password', param['code']);
-								$.cookie('name', param['name']);
-								$.cookie('studentNum', param['studentNum']);
-							}
-							initialize(csvData);
-							$('#verification').modal('hide');
-							$('#overlay').show();
-						}
-					},
-					error: function (res) {
-						$('#form-verification input, #form-verification-student input').val('');
-						$('#msg-wrong').remove();
-						if($('#form-verification-student').hasClass('show')){
-							$('#verification').find('.modal-body').prepend('<p id="msg-wrong">访问信息错误。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630</p>');
-						}
-						else {
-							$('#verification').find('.modal-body').prepend('<p id="msg-wrong">访问信息错误。');
-						}
-						$('#msg-wrong').animate({ 'opacity': 1 }, 500)
+			$('#input-phone-number-signup').blur(function (e){
+				phoneNumLookup($('#input-phone-number-signup').val().trim(), function(status){
+					if(status == '1'){
+						showError('该电话号码未被白名单收录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630');
+					}
+					if(status == '2' && $('#form-signup').hasClass('show')){
+						showError('该电话号码已注册！请直接登录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630');
 					}
 				});
+			});
+			
+			function ajaxVerify(url, param){
+				phoneNumLookup(param.phoneNum, function(status){
+					if(status == '1'){
+						showError('该电话号码未被白名单收录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630');
+					}
+					if(url == URL_SIGNUP && status == '2'){
+						showError('该电话号码已注册！请直接登录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630');
+					}
+					// When the callback status is 2 (user already exists), the url needs to be URL_LOGIN to make sure that the ajax request will be sent
+					if(status != '1' && (url == URL_LOGIN || status != '2')){
+						$.ajax({
+							type: 'GET',
+							url: url,
+							dataType: 'text',
+							data: param,
+							success: function (result) {
+								if(result.substr(0, 1) == '1'){
+									showError('请正确输入电话号码');
+								}
+								else if(result.substr(0, 1) == '2'){
+									showError('验证码错误');
+								}
+								else if(result.substr(0, 1) == '3'){
+									showError('电话号码或密码错误');
+								}
+								else {
+									if(!dataReceived){
+										dataReceived = true;
+										if($.cookie('phoneNum') == undefined && $.cookie('passwordSha') == undefined){
+											$('#modal-helper').modal('toggle');
+										}
+										if($('#check-remember-password')[0].checked){
+											$.cookie('phoneNum', param['phoneNum']);
+											$.cookie('passwordSha', param['passwordSha']);
+										}
+										initialize(result);
+										$('#verification').modal('hide');
+										$('#overlay').show();
+									}
+								}
+							},
+							error: function (res) {
+								showError('访问错误。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630');
+							}
+						});
+					}
+				});
+			}
+			
+			function showError(msgHTML){
+				$('#msg-wrong').remove();
+				if(msgHTML != ''){
+					$('#verification').find('.modal-body').prepend(`<p id="msg-wrong">${msgHTML}</p>`);
+					$('#msg-wrong').animate({ 'opacity': 1 }, 500);	
+				}
 			}
 
 			function initialize(csvData) {
