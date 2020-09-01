@@ -100,7 +100,7 @@ app.get('/signup', (req, res) => {
 		return;
 	}
 	
-	if(true || req.query.verificationCode == verificationCodeTemp[phoneNum]){
+	if(req.query.verificationCode == verificationCodeTemp[phoneNum]){
 		verificationCodeTemp[phoneNum] = undefined;
 		setPassword(passwordSha, phoneNum, function(err, results){
 			if(err) console.log(err);
