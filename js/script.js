@@ -59,7 +59,7 @@
 							url: URL_GET_CODE,
 							data: param,
 							success: function(result) {
-								console.log(result);
+								//console.log(result);
 							}
 						});
 						var smsInterval = setInterval(function(e){
@@ -269,6 +269,10 @@
 					delimiter: ','
 				}, function (err, data) {
 					map.on('load', function () {
+						var info = data.features.shift().properties.NameCN;
+						if(info != 'international'){
+							$('#btn-show-map').remove();
+						}
 						//Add the the layer to the map
 						map.addLayer({
 							'id': 'csvData',
@@ -786,7 +790,6 @@
 		$(window).on('resize', function(e){
 			updateNameScroll();
 			$(':root').css({'--vh': window.innerHeight / 100 + 'px'});
-			console.log($(':root').css('--vh'));
 		});
 		
 		$(document).on('click', '.btn-remove-tag', function(e){
