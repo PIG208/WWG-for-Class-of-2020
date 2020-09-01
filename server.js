@@ -41,30 +41,6 @@ app.get('/', (req, res) => {
 	return res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.get('/verification', (req, res) => {
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-	if(req.query.code == 'testcode'){
-		return res.sendFile(path.join(__dirname, 'studentInfo.csv'));
-	}
-	else{
-		res.status(403);
-		return res.send('Wrong verification code.');
-	}
-});
-
-// Old login method through student name and student number
-app.get('/verificationStu', (req, res) => {
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-	if(studentNumDict[req.query.name] == req.query.studentNum){
-		console.log('matched');
-		return res.sendFile(path.join(__dirname, 'studentInfo.csv'));
-	}
-	else{
-		res.status(403);
-		return res.send('Wrong verification code.');
-	}
-});
-
 // Send a verification code through alicloud api and store it temporarily
 app.get('/getVerificationCode', (req, res) => {
 	const code = Math.floor((Math.random() * 99999 - 10000) + 10000);
