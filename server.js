@@ -13,12 +13,29 @@ const hostname = 'localhost';
 const dbInfo = JSON.parse(fs.readFileSync('db-info.json', 'utf8'));
 const aliyunInfo = JSON.parse(fs.readFileSync('aliyun-info.json', 'utf8'));
 
-const conn = mysql.createConnection({
+var conn;
+
+function dbConnect(){
+	conn = mysql.createConnection({
 	host:dbInfo.host,
 	user:dbInfo.username,
 	password:dbInfo.password,
-	database:dbInfo.database
-});
+	database:dbInfo.database,
+	wait_timeout:5
+	});
+	
+	conn.on('error', function(err){
+		console.log('db error:' + err.code);
+		if(err.code == 'PROTOCOL_CONNECTION_LOST'){
+			dbConnect();
+		}
+		else {
+			throw err;
+		}
+	});
+}
+
+dbConnect();
 
 const client = new Core({
 	accessKeyId: aliyunInfo.accessKeyId,
