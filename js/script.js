@@ -20,21 +20,21 @@
 		const URL_LOGIN = '/login', URL_SIGNUP = '/signup', URL_CHECK_PHONE_NUM = '/checkPhoneNum', URL_GET_CODE = '/getVerificationCode';
 
 		$(document).ready(function () {
-			
+
 			$(':root').css({'--vh': window.innerHeight / 100 + 'px'});
 
 			$("#verification").modal('show');
-			
+
 			$('#form-verification, #form-verification-student').submit(function(e){
 				e.preventDefault();
 				$('#btn-verification').click();
 			})
-			
+
 			if($.cookie('phoneNum') != undefined && $.cookie('passwordSha') != undefined){
 				const params = { phoneNum: $.cookie('phoneNum'), passwordSha: $.cookie('passwordSha')};
 				ajaxVerify(URL_LOGIN, params);
 			}
-			
+
 			$('#btn-toggle-verification').click(function (e){
 				if($('#form-signup').hasClass('show')){
 					$('#btn-toggle-verification').text('去注册');
@@ -43,10 +43,18 @@
 					$('#btn-toggle-verification').text('去登录');
 				}
 			});
-			
+
 			$('#btn-send-sms').click(function (e){
 				e.preventDefault();
 				phoneNumLookup($('#input-phone-number-signup').val().trim(), function(status){
+					if(status == '1'){
+						showError('该电话号码未被白名单收录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630');
+						return;
+					}
+					if(status == '2'){
+						showError('该电话号码已注册！请直接登录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630');
+						return;
+					}
 					if(status == 0){
 						var countDown = 60;
 						$('#btn-send-sms')[0].disabled = true;
@@ -76,7 +84,7 @@
 					}
 				});
 			});
-			
+
 			function validateForm(){
 				if($('#form-signup').hasClass('show')){
 					if($('#input-phone-number-signup').val().trim() == ''){
@@ -119,12 +127,12 @@
 				}
 				return false;
 			}
-			
+
 			function validatePhoneNum(phoneNum){
 				result = phoneNum.match(/[1-9][0-9]+/);
 				return result != undefined && result[0].length == phoneNum.length;
 			}
-			
+
 			// Lookup the phone number in the database and gives true to the callback if the phone number is valid.
 			function phoneNumLookup(phoneNum, callback){
 				if(!validatePhoneNum(phoneNum)){
@@ -154,7 +162,7 @@
 					});
 				}
 			}
-			
+
 			$('#btn-verification').click(function (e) {
 				e.preventDefault();
 				var param, url;
@@ -178,7 +186,7 @@
 				}
 				ajaxVerify(url, param);
 			});
-			
+
 			$('#input-phone-number-signup').blur(function (e){
 				phoneNumLookup($('#input-phone-number-signup').val().trim(), function(status){
 					if(status == '1'){
@@ -189,7 +197,7 @@
 					}
 				});
 			});
-			
+
 			function ajaxVerify(url, param){
 				phoneNumLookup(param.phoneNum, function(status){
 					if(status == '1'){
@@ -238,12 +246,12 @@
 					}
 				});
 			}
-			
+
 			function showError(msgHTML){
 				$('#msg-wrong').remove();
 				if(msgHTML != ''){
 					$('#verification').find('.modal-body').prepend(`<p id="msg-wrong">${msgHTML}</p>`);
-					$('#msg-wrong').animate({ 'opacity': 1 }, 500);	
+					$('#msg-wrong').animate({ 'opacity': 1 }, 500);
 				}
 			}
 
@@ -293,12 +301,12 @@
 							//studentInfo[(feature['properties']['Name'])] = feature;
 							studentInfo.push(feature);
 						});
-						
+
 						function normalize(v) {
 							// Quadratic function that maps map zoom level ranges in [-2, 22] to the radius of the circle ranges in [7, 12]
 							return -0.0086 * Math.pow(v - 22, 2) + 11.5
 						}
-						
+
 						map.on('zoom',function(e){e.target.setPaintProperty('csvData','circle-radius',normalize(e.target.getZoom()));});
 
 						map.on('mouseenter', 'csvData', function (e) { createPopup(e.features, e); });
@@ -348,28 +356,28 @@
 				+ '</ul>'
 				+ '</div>'
 				+ '</div>');
-			
+
 			if (features.length > 1) {
 				// Add btn group to the popup
 				$temp.append(
 					'<div class="btn-group">'
-						+'<button id="btn-prev" class="btn btn-primary">' 
-							+ '<i class="fa fa-angle-left"></i>' 
+						+'<button id="btn-prev" class="btn btn-primary">'
+							+ '<i class="fa fa-angle-left"></i>'
 							+ FeatureText.prev()
 						+ '</button>'
-						+ '<button id="btn-next" class="btn btn-primary">' 
+						+ '<button id="btn-next" class="btn btn-primary">'
 							+ FeatureText.next()
 							+ '<i class="fa fa-angle-right"></i>'
 						+ '</button>'
 					+ '</div>');
 			}
-			
+
 			var description = formatDescription($temp, features[i])[0].outerHTML;
 
 			if(e != undefined){
 				while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
 					coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-				}	
+				}
 			}
 
 			// Add Popup to map
@@ -380,13 +388,13 @@
 			// When there're multiple people at the same point
 			if (features.length > 1) {
 				appendPageCount();
-				
+
 				$('#btn-next').click(e => {
 					if (i == features.length - 1) i = -1;
 					formatDescription($('#popup'), features[++i]);
 					appendPageCount();
 				});
-				
+
 				$('#btn-prev').click(e => {
 					if (i == 0) i = features.length;
 					formatDescription($('#popup'), features[--i]);
@@ -400,7 +408,7 @@
 
 		function createModal(features) {
 			var i = 0;
-			
+
 			function appendPageCount() {
 				$("#card-info").find('.card-title').append('<span class="page-count"> (' + (i + 1) + '/' + features.length + ')</span>');
 			}
@@ -411,13 +419,13 @@
 				appendPageCount()
 				$('#modal-btn-group').show();
 				$("#card-info").find('.page-count').show();
-				
+
 				$('#modal-btn-next').click(e => {
 					if (i == features.length - 1) i = -1;
 					formatDescription($('#card-info'), features[++i]);
 					appendPageCount()
 				});
-				
+
 				$('#modal-btn-prev').click(e => {
 					if (i == 0) i = features.length;
 					formatDescription($('#card-info'), features[--i]);
@@ -447,7 +455,7 @@
 				}
 			}
 			else {
-				element.find('h5').text(FeatureText.name(feature));	
+				element.find('h5').text(FeatureText.name(feature));
 			}
 			element.find('span').get(0).innerHTML = FeatureText.school(feature);
 			element.find('span').get(1).innerHTML = FeatureText.major(feature);
@@ -467,7 +475,7 @@
 		$("#form-search > input").on('keyup', function (e) {
 			updateSearchDropDown();
 		});
-		
+
 		$("#form-search > input").on('focus', function (e) {
 			updateSearchDropDown();
 		});
@@ -486,7 +494,7 @@
 		});
 
 		// Update the dropdown list according to the keyword
-		function updateSearchDropDown() {  
+		function updateSearchDropDown() {
 			const keyword = $('#form-search > input')[0].value;
 
 			if (keyword != undefined && keyword.length > 0) {
@@ -640,7 +648,7 @@
         $(document).on('mouseup', '#btn-group-switch-lang .btn', function (e) {
 			langRefresh();
 		});
-		
+
 		function langRefresh(){
 			// Toggles the language
 			if($('#list-display').css('display') == 'none' || $('#list-display > .tags-container > .tag').length == 1 || forceSwitch){
@@ -690,7 +698,7 @@
 				$('#modal-confirm').modal('show');
 			}
 		}
-		
+
 		$('#modal-confirm').on('hide.bs.modal', function(e) {
 			if(!forceSwitch) {
 				if($('#btn-group-switch-lang .btn').first().hasClass('active')){
@@ -701,11 +709,11 @@
 				}
 			}
 		});
-		
+
 		$('#map').click(function(e) {
 			$('#search-dropdown').fadeOut();
 		});
-		
+
 		$('#btn-modal-confirm').click(function(e) {
 			forceSwitch = true;
 			$('#modal-confirm').modal('hide');
@@ -721,7 +729,7 @@
 			});
 			langRefresh();
 		});
-		
+
 		$('#btn-list-display').click(function(e){
 			if($('#list-display').css('display') == 'none'){
 				updateListDisplay();
@@ -736,18 +744,18 @@
 				$('#list-display').fadeOut(250);
 			}
 		});
-		
+
 		$('#btn-add-tag').click(function(e){
 			$('#tag-dropdown-menu-link').text(FeatureText.chooseFilter());
 			$('#tag-selection > .tag').remove();
 		});
-		
+
 		$('#tag-dropdown-menu > .dropdown-item').click(function(e){
 			$('#tag-dropdown-menu-link').text($(e.target).text());
 			var $element = $getTarget('dropdown-item', e.target);
 			var properties = FeatureText.getPropertiesFromFeatures(studentInfo, $element.attr('data-property-name'));
 			$('#tag-selection > .tag').remove();
-			
+
 			for(var i = 0; i < properties.length; i++){
 				if($('#list-display > .tags-container > .tag[data-property="' + properties[i].property + '"]').length > 0){
 					continue;
@@ -759,11 +767,11 @@
 									+ '</span></div>'
 				$('#tag-selection').append(tagElement);
 			}
-			
+
 			// Triggered when the user clicks on the tags
 			$('#tag-selection > .tag').click(function(e){
 				var $element = $getTarget('tag', e.target);
-				
+
 				if($element.hasClass('tag-active')){
 					$element.removeClass('tag-active');
 				}
@@ -772,7 +780,7 @@
 				}
 			});
 		});
-		
+
 		$('#btn-add-tag-selection').click(function(e){
 			$('#tag-selection > .tag-active').each((index, ele) => {
 				$(ele).removeClass('tag-active');
@@ -786,43 +794,43 @@
 			});
 			updateListDisplay();
 		});
-		
+
 		$(window).on('resize', function(e){
 			updateNameScroll();
 			$(':root').css({'--vh': window.innerHeight / 100 + 'px'});
 		});
-		
+
 		$(document).on('click', '.btn-remove-tag', function(e){
 			$(e.target).parent().remove();
 			updateListDisplay();
 		});
-		
+
 		$(document).on('click', '.name-card', function(e){
 			const index = parseInt($getTarget('name-card', e.target).attr('data-feature-index'));
 			createModal(studentInfo.slice(index, index + 1));
 		});
-		
+
 		var touching = false;
-		
+
 		$(document).on('touchstart', '#name-scroll > div', function(e) {
 			touching = true;
 			moveToDivider(e.target);
 		});
-		
+
 		$(document).on('touchend', '#name-scroll', function(e) {
 			touching = false;
 		});
-		
+
 		$(document).on('touchmove', '#name-scroll > div', function(e){
 			if(touching){
 				moveToDivider(e.target);
 			}
 		});
-		
+
 		$(document).on('mousedown', '#name-scroll > div', function(e){
 			moveToDivider(e.target);
 		});
-		
+
 		function moveToDivider(nameScrollElement) {
 			var $target = $('#names-view > .divider:contains("' + $(nameScrollElement).text() + '")');
 			if($target.length > 0){
@@ -830,8 +838,8 @@
 				$('#list-display').animate({'scrollTop':$('#list-display').scrollTop() + $target.offset().top - parseFloat($(window).height())/10},100);
 			}
 		}
-		
-		
+
+
 		function $getTarget(className, ele){
 			// Make sure the tag element is selected
 			$element = $(ele);
@@ -840,7 +848,7 @@
 			}
 			return $element;
 		}
-		
+
 		function updateNameScroll() {
 			$('#name-scroll > div').remove();
 			for(var i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++){
@@ -851,7 +859,7 @@
 			}
 			$('#name-scroll > div').css('height',  parseFloat($('#name-scroll').css('height'))/$('#name-scroll > div').length + 'px');
 		}
-		
+
 		function updateListDisplay(){
 			$('#names-view .name-card,.divider').remove();
 			var propertyFilters = {};
@@ -867,7 +875,7 @@
 					propertyFilters[propertyName].push(property);
 				}
 			});
-			
+
 			var alphaOrder = 'a'.charCodeAt(0);
 			studentInfo.forEach((feature, index) => {
 				var filtersSatisfied = 0;
@@ -904,7 +912,7 @@
 
 		// class with static functions to display text according to current language setting
 		class FeatureText {
-			
+
 			static propertyNameToFunc(propertyName){
 				switch(propertyName){
 					case 'Class':
@@ -927,13 +935,13 @@
 						break;
 				}
 			}
-			
+
 			// Returns a sorted array consist of a certain list of properties and the corresponding count of features having the property among the given features
 			static getPropertiesFromFeatures(features, propertyName){
 				var properties = [];
 				var propertiesDict = {};
 				var getText = FeatureText.propertyNameToFunc(propertyName);
-				
+
 				for(var i = 0; i < features.length; i++){
 					if(getText(features[i]).trim() == '') continue;
 					if(propertiesDict[getText(features[i])] >= 0){
@@ -948,7 +956,7 @@
 					properties.push();
 				}
 				properties.sort((a, b) => (Math.sign(b.count - a.count)));
-				
+
 				return properties;
 			}
 
@@ -996,7 +1004,7 @@
 						return feature.properties.MajorEN;
 				}
 			}
-			
+
 			static countryRegion(feature) {
 				switch (lang) {
 					case 0:
@@ -1005,7 +1013,7 @@
 						return feature.properties.CountryRegionEN;
 				}
 			}
-			
+
 			static region(feature) {
 				switch (lang) {
 					case 0:
@@ -1014,7 +1022,7 @@
 						return feature.properties.RegionEN;
 				}
 			}
-			
+
 			static city(feature) {
 				switch (lang) {
 					case 0:
@@ -1023,7 +1031,7 @@
 						return feature.properties.CityEN;
 				}
 			}
-			
+
 			static next() {
 				switch (lang) {
 					case 0:
@@ -1032,7 +1040,7 @@
 						return "Next";
 				}
 			}
-			
+
 			static prev() {
 				switch (lang) {
 					case 0:
@@ -1041,7 +1049,7 @@
 						return "Previous";
 				}
 			}
-			
+
 			static chooseFilter() {
 				switch(lang){
 					case 0:
@@ -1050,7 +1058,7 @@
 						return "Choose a filter";
 				}
 			}
-			
+
 			static filter() {
 				switch(lang){
 					case 0:
@@ -1068,7 +1076,7 @@
 						return "Click on names to view personal profile.";
 				}
 			}
-			
+
 			static addTagHintMsg() {
 				switch(lang){
 					case 0:
@@ -1077,7 +1085,7 @@
 						return "Click on tags to add.";
 				}
 			}
-			
+
 			static modalConfirmHintMsg() {
 				switch(lang){
 					case 0:
@@ -1086,7 +1094,7 @@
 						return "Switching language will remove all filters. Continue?";
 				}
 			}
-			
+
 			static modalAddTagTitleMsg() {
 				switch(lang){
 					case 0:
@@ -1095,7 +1103,7 @@
 						return "Add Filter"
 				}
 			}
-			
+
 			static mapDownloadLinkHintMsg() {
 				switch(lang) {
 					case 0:
@@ -1104,7 +1112,7 @@
 						return "Download Full Image (19.6 MB)";
 				}
 			}
-			
+
 			static helperMsg() {
 				switch(lang){
 					case 0:
@@ -1129,7 +1137,7 @@
 								  + '<li>To update your infomation (such as schools or gapping/deferring status), share advice or make complaint, please contact Jaelyn Chen (WeChat ID jychen630).</li>'
 				}
 			}
-			
+
 			static helperTitle() {
 				switch(lang) {
 					case 0:
@@ -1138,7 +1146,7 @@
 						return "Help";
 				}
 			}
-			
+
 			static modalMapTitle() {
 				switch(lang) {
 					case 0:
@@ -1147,7 +1155,7 @@
 						return "Graduation Map";
 				}
 			}
-			
+
 			static filterSchool(){
 				switch(lang){
 					case 0:
@@ -1156,7 +1164,7 @@
 						return "School";
 				}
 			}
-			
+
 			static filterMajor(){
 				switch(lang){
 					case 0:
@@ -1165,7 +1173,7 @@
 						return "Major";
 				}
 			}
-			
+
 			static filterClass(){
 				switch(lang){
 					case 0:
@@ -1174,7 +1182,7 @@
 						return "Class";
 				}
 			}
-			
+
 			static filterCountryRegion(){
 				switch(lang){
 					case 0:
@@ -1183,7 +1191,7 @@
 						return "Country/Region";
 				}
 			}
-			
+
 			static filterRegion(){
 				switch(lang){
 					case 0:
@@ -1192,7 +1200,7 @@
 						return "Region";
 				}
 			}
-			
+
 			static filterCity(){
 				switch(lang){
 					case 0:
@@ -1201,7 +1209,7 @@
 						return "City";
 				}
 			}
-			
+
 			static filterSchool(){
 				switch(lang){
 					case 0:
@@ -1210,7 +1218,7 @@
 						return "School";
 				}
 			}
-			
+
 			static cancel() {
 				switch(lang){
 					case 0:
@@ -1219,7 +1227,7 @@
 						return "Cancel";
 				}
 			}
-			
+
 			static confirm() {
 				switch(lang){
 					case 0:
