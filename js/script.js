@@ -17,6 +17,10 @@
 		var studentInfo = [];
 		var popup = new mapboxgl.Popup({ closeOnMove: true, closeOnClick: true })
 		var dataReceived = false;
+		const Curriculum = {};
+		Curriculum.GAOKAO = 0;
+		Curriculum.INTERNATIONAL = 1;
+		var curriculum;
 		const URL_LOGIN = '/login', URL_SIGNUP = '/signup', URL_CHECK_PHONE_NUM = '/checkPhoneNum', URL_GET_CODE = '/getVerificationCode';
 
 		$(document).ready(function () {
@@ -288,8 +292,13 @@
 				}, function (err, data) {
 					map.on('load', function () {
 						var info = data.features.shift().properties.NameCN;
-						if(info != 'international'){
+						if(info == 'gaokao'){
+							curriculum = Curriculum.GAOKAO;
 							$('#btn-show-map').remove();
+							$('#btn-switch-lang').remove();
+						}
+						else {
+							curriculum = Curriculum.INTERNATIONAL;
 						}
 						//Add the the layer to the map
 						map.addLayer({
@@ -516,8 +525,8 @@
 				};
 
 				// Show the dropdown list and remove all previous items on it
-                $('#search-dropdown').show();
-                $('#search-dropdown').css({ 'height': 'unset' });
+        $('#search-dropdown').show();
+        $('#search-dropdown').css({ 'height': 'unset' });
 				$('#search-dropdown a').remove();
 
 				// Append list items to the dropdown list
@@ -1128,7 +1137,7 @@
 					case 0:
 						return '<li>点击<i class="fa fa-bars"></i>可查看完整通讯录；</li>'
 								  + '<li>在搜索框里输入关键词，例如输入“NYU”搜索所有在NYU上学的同学；</li>'
-								  + '<li>点击右下角按钮可以切换中文/英文；</li>'
+								  + `${(curriculum == Curriculum.INTERNATIONAL)?"<li>点击右下角按钮可以切换中文/英文；</li>":""}`
 								  + '<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向；</li>'
 								  + '<li>(Gapping)/(Deferring)标签标注出了在2020-2021学年中选择Gap/Defer的同学；</li>'
 								  + '<li>缩放地图可查看学校在所处城市中的精确定位，这在学校分布密集的城市尤有帮助，例如美国东北部地区；</li>'
