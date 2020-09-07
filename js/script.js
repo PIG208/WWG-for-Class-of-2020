@@ -233,6 +233,16 @@
 											$.cookie('phoneNum', param['phoneNum']);
 											$.cookie('passwordSha', param['passwordSha']);
 										}
+										$('*[href^="maps"]').each(function(tag){
+											$(this).attr('href', `${$(this).attr('href')}`
+											+ `?phoneNum=${param['phoneNum']}`
+											+ `&passwordSha=${param['passwordSha']}`);
+										});
+										$('*[data-src^="maps"]').each(function(tag){
+											$(this).attr('src', `${$(this).attr('data-src')}`
+											+ `?phoneNum=${param['phoneNum']}`
+											+ `&passwordSha=${param['passwordSha']}`);
+										});
 										initialize(result);
 										$('#verification').modal('hide');
 										$('#overlay').show();

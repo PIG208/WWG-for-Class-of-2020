@@ -1,4 +1,9 @@
 //'use strict'
+
+// The app use the following code for return status
+// 1: Invalid phone number.
+// 2: Invalid verification code.
+// 3: Wrong password.
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -20,10 +25,9 @@ function dbConnect(){
 	host:dbInfo.host,
 	user:dbInfo.username,
 	password:dbInfo.password,
-	database:dbInfo.database,
-	wait_timeout:5
+	database:dbInfo.database
 	});
-	
+
 	conn.on('error', function(err){
 		console.log('db error:' + err.code);
 		if(err.code == 'PROTOCOL_CONNECTION_LOST'){
@@ -86,13 +90,13 @@ app.get('/getVerificationCode', (req, res) => {
 app.get('/signup', (req, res) => {
 	const passwordSha = req.query.passwordSha;
 	const phoneNum = req.query.phoneNum;
-	
+
 	if(!validatePhoneNum(phoneNum)){
 		console.log(`${phoneNum} is invalid!`);
 		res.send('1invalid phone number.');
 		return;
 	}
-	
+
 	if(req.query.verificationCode == verificationCodeTemp[phoneNum]){
 		verificationCodeTemp[phoneNum] = undefined;
 		setPassword(passwordSha, phoneNum, function(err, results){
@@ -116,7 +120,6 @@ app.get('/checkPhoneNum', (req, res) => {
 	if(validatePhoneNum(req.query.phoneNum)){
 		lookupPhoneNum(req.query.phoneNum, function(err, results){
 			if(err) console.log(err);
-			console.log('asdasd', results);
 			if(results != undefined && results.length > 0){
 				console.log(results[0].password_hash);
 				if(results[0].password_hash != null){
@@ -129,7 +132,7 @@ app.get('/checkPhoneNum', (req, res) => {
 			else {
 				res.send('1');
 			}
-		});	
+		});
 	}
 	else {
 		res.send('2');
@@ -138,17 +141,35 @@ app.get('/checkPhoneNum', (req, res) => {
 
 // Check login credentials
 app.get('/login', (req, res) => {
-	conn.query(`SELECT * FROM user_credentials WHERE phone_num="${req.query.phoneNum}"`, function(err, results){
-		if(results.length > 0){
-			 if(crypto.createHash('sha256').update(results[0].salt + req.query.passwordSha).digest('hex') == results[0].password_hash){
-				sendCsvForCurriculum(req.query.phoneNum, res);
-			}
-			else {
-				res.send('3Wrong phone number or password.');
-			}
+	validateLogin(req.query.phoneNum, req.query.passwordSha, function(statusCode){
+		if(statusCode == 0){
+			sendCsvForCurriculum(req.query.phoneNum, res);
 		}
-		else {
+		else if(statusCode == 1){
 			res.send('1Invalid phone number');
+		}
+		else if(statusCode == 3){
+			res.send('3Wrong phone number or password.');
+		}
+	});
+});
+
+app.get('/maps/*', (req, res) => {
+	validateLogin(req.query.phoneNum, req.query.passwordSha, function(statusCode){
+		if(statusCode == 0){
+			try{
+				const imUrl = req.url.match(/maps\/(.+)\?/)[1];
+				res.sendFile(path.join(__dirname, `maps/${imUrl}`));
+			}
+			catch(e){
+				console.log(e);
+				res.status(404).send('Invalid url');
+			}
+			console.log("ori", req, req.originalUrl.match(/maps\/(.+)(\?)?/)[1]);
+
+		}
+		else{
+			res.status(403).end('Unauthorized /GET request');
 		}
 	});
 });
@@ -158,9 +179,26 @@ function validatePhoneNum(phoneNum){
 	return phoneNum.match(/[1-9][0-9]+/)[0].length == phoneNum.length;
 }
 
+// Return status code for login
+function validateLogin(phoneNum, passwordSha, callback){
+	conn.query(`SELECT * FROM user_credentials WHERE phone_num="${phoneNum}"`, function(err, results){
+		if(results.length > 0){
+			 if(crypto.createHash('sha256').update(results[0].salt + passwordSha).digest('hex') == results[0].password_hash){
+				callback(0);
+			}
+			else {
+				callback(3);
+			}
+		}
+		else {
+			callback(1);
+		}
+	});
+}
+
 // Lookup the table user_credentials for the phone number
 function lookupPhoneNum(phoneNum, callback) {
-	conn.query(`SELECT phone_num,password_hash FROM user_credentials WHERE phone_num="${phoneNum}"`, callback);
+	conn.query(`SELECT phone_num FROM user_credentials WHERE phone_num="${phoneNum}"`, callback);
 }
 
 // general password reset method that requires a verificationCode and the corresponding phone number
