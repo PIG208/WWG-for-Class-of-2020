@@ -292,10 +292,14 @@
 				}, function (err, data) {
 					map.on('load', function () {
 						var info = data.features.shift().properties.NameCN;
+						langRefresh();
 						if(info == 'gaokao'){
+							map.setZoom(2);
+							map.setCenter([108.003565, 25.594860]);
+							//map.setMaxBounds([[43.916113, 1.414517],[177.275332, 57.598319]]);
 							curriculum = Curriculum.GAOKAO;
 							$('#btn-show-map').remove();
-							$('#btn-switch-lang').remove();
+							$('#btn-group-switch-lang').css({'visibility':'hidden'});
 						}
 						else {
 							curriculum = Curriculum.INTERNATIONAL;
@@ -367,11 +371,14 @@
 					+ '<h5 class="card-title"></h5>'
 				+ '</div>'
 				+ '<ul style="list-style:none; padding-left:0">'
-				+ '<li>' + '<i class="fa fa-university"></i><span></span></li>'
-				+ '<li>' + '<i class="fa fa-book"></i><span></span></li>'
-				+ '<li>' + '<i class="fa fa-phone"></i><span></span></li>'
-				+ '<li>' + '<i class="fa fa-wechat"></i><span></span></li>'
-				+ '<li>' + '<i class="fa fa-home"></i><span></span></li>'
+				+	'<li><i class="fa fa-map-pin"></i><span></span></li>'
+				+	'<li><i class="fa fa-map"></i><span></span></li>'
+				+	'<li><i class="fa fa-building"></i><span></span></li>'
+				+ '<li><i class="fa fa-university"></i><span></span></li>'
+				+ '<li><i class="fa fa-book"></i><span></span></li>'
+				+ '<li><i class="fa fa-phone"></i><span></span></li>'
+				+ '<li><i class="fa fa-wechat"></i><span></span></li>'
+				+ '<li><i class="fa fa-home"></i><span></span></li>'
 				+ '</ul>'
 				+ '</div>'
 				+ '</div>');
@@ -476,11 +483,15 @@
 			else {
 				element.find('h5').text(FeatureText.name(feature));
 			}
-			element.find('span').get(0).innerHTML = FeatureText.school(feature);
-			element.find('span').get(1).innerHTML = FeatureText.major(feature);
-			element.find('span').get(2).innerHTML = FeatureText.phone(feature);
-			element.find('span').get(3).innerHTML = FeatureText.wechat(feature);
-			element.find('span').get(4).innerHTML = FeatureText.class_(feature);
+			console.log(element);
+			element.find('span').get(0).innerHTML = FeatureText.countryRegion(feature);
+			element.find('span').get(1).innerHTML = FeatureText.region(feature);
+			element.find('span').get(2).innerHTML = FeatureText.city(feature);
+			element.find('span').get(3).innerHTML = FeatureText.school(feature);
+			element.find('span').get(4).innerHTML = FeatureText.major(feature);
+			element.find('span').get(5).innerHTML = FeatureText.phone(feature);
+			element.find('span').get(6).innerHTML = FeatureText.wechat(feature);
+			element.find('span').get(7).innerHTML = FeatureText.class_(feature);
 			element.find('li').each((i, e) => {
 				if ($(e).find('span').text().trim() == '') {
 					$(e).hide();
@@ -534,7 +545,7 @@
 					$('#search-dropdown').append('<a class="dropdown-item" onclick="jumpToByName(\'' + result.value.properties.NameCN + '\');$(\'#search-dropdown\').fadeOut();">' + FeatureText.name(result.value) + '<p>' + keyNameToFA(result.matchedPattern.matchedKey) + result.matchedPattern.matchedSubstr + '</p></a>');
                 });
                 if (results.length > 4) {
-                    $('#search-dropdown').append('<a id="item-show-more" class="dropdown-item">show more</a>');
+                    $('#search-dropdown').append('<a id="item-show-more" class="dropdown-item">' + ((lang == 0)?'更多':'show more') + '</a>');
                     $('#search-dropdown').css({ 'height': $('#search-dropdown').css('height') });
 					$('#item-show-more').click(function (e) {
 						$(this).hide();
@@ -600,6 +611,9 @@
 								matchedSubstr = aliases[n];
 							}
 						}
+						if(key == 'Class'){
+							matchedSubstr = `高三 (${matchedSubstr}) 班`;
+						}
 						if(key == 'IsGap'){
 							switch(parseInt(matchedSubstr)){
 								case 0:
@@ -655,6 +669,18 @@
 					return '<i class="fa fa-wechat"></i>';
 				case 'Class':
 					return '<i class="fa fa-home"></i>';
+				case 'CountryRegion':
+					return '<i class="fa fa-map-pin"></i>';
+				case 'Region':
+				case 'RegionCN':
+				case 'RegionEN':
+					return '<i class="fa fa-map"></i>';
+				case 'CountryRegion':
+					return '<i class="fa fa-map-pin"></i>';
+				case 'City':
+				case 'CityCN':
+				case 'CityEN':
+					return '<i class="fa fa-building"></i>'
 			}
 			return '';
 		}
@@ -955,7 +981,8 @@
 				}
 			}
 
-			// Returns a sorted array consist of a certain list of properties and the corresponding count of features having the property among the given features
+			// Returns a sorted array consist of a certain list of properties
+			// and the corresponding count of features having the property among the given features
 			static getPropertiesFromFeatures(features, propertyName){
 				var properties = [];
 				var propertiesDict = {};
@@ -1136,12 +1163,11 @@
 				switch(lang){
 					case 0:
 						return '<li>点击<i class="fa fa-bars"></i>可查看完整通讯录；</li>'
-								  + '<li>在搜索框里输入关键词，例如输入“NYU”搜索所有在NYU上学的同学；</li>'
+								  + `<li>在搜索框里输入关键词，例如输入“${(curriculum == Curriculum.INTERNATIONAL)?"NYU":"中山大学"}”搜索所有在${(curriculum == Curriculum.INTERNATIONAL)?"NYU":"中山大学"}上学的同学；</li>`
 								  + `${(curriculum == Curriculum.INTERNATIONAL)?"<li>点击右下角按钮可以切换中文/英文；</li>":""}`
 								  + '<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向；</li>'
 								  + '<li>(Gapping)/(Deferring)标签标注出了在2020-2021学年中选择Gap/Defer的同学；</li>'
-								  + '<li>缩放地图可查看学校在所处城市中的精确定位，这在学校分布密集的城市尤有帮助，例如美国东北部地区；</li>'
-								  + '<li>未决定学校去向的同学暂时定位于深圳；</li>'
+								  + `<li>缩放地图可查看学校在所处城市中的精确定位，这在学校分布密集的城市尤有帮助，例如${(curriculum == Curriculum.INTERNATIONAL)?'美国东北部地区；</li>':'广东地区'}`
 								  + '<li>本地图为不完全统计，个人信息以自愿为原则采集；</li>'
 								  + '<li>如需更新个人信息（如就读学校、休学状态），或者投诉与建议，请联系微信账号jychen630；</li>';
 					case 1:
@@ -1214,7 +1240,7 @@
 			static filterRegion(){
 				switch(lang){
 					case 0:
-						return "州/郡/省";
+						return `${(curriculum == Curriculum.INTERNATIONAL)?"州/郡/省":"省"}`;
 					case 1:
 						return "Region";
 				}
