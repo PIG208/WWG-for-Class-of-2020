@@ -1166,10 +1166,10 @@
 								  + `<li>在搜索框里输入关键词，例如输入“${(curriculum == Curriculum.INTERNATIONAL)?"NYU":"中山大学"}”搜索所有在${(curriculum == Curriculum.INTERNATIONAL)?"NYU":"中山大学"}上学的同学；</li>`
 								  + `${(curriculum == Curriculum.INTERNATIONAL)?"<li>点击右下角按钮可以切换中文/英文；</li>":""}`
 								  + '<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向；</li>'
-								  + '<li>(Gapping)/(Deferring)标签标注出了在2020-2021学年中选择Gap/Defer的同学；</li>'
+								  + `${(curriculum == Curriculum.INTERNATIONAL)?"<li>(Gapping)/(Deferring)标签标注出了在2020-2021学年中选择Gap/Defer的同学；</li>":""}`
 								  + `<li>缩放地图可查看学校在所处城市中的精确定位，这在学校分布密集的城市尤有帮助，例如${(curriculum == Curriculum.INTERNATIONAL)?'美国东北部地区；</li>':'广东地区'}`
 								  + '<li>本地图为不完全统计，个人信息以自愿为原则采集；</li>'
-								  + '<li>如需更新个人信息（如就读学校、休学状态），或者投诉与建议，请联系微信账号jychen630；</li>';
+								  + `<li>如需更新个人信息（如${(curriculum == Curriculum.INTERNATIONAL)?"就读学校、休学状态":"手机号、就读专业"}），或者投诉与建议，请联系微信账号jychen630；</li>`;
 					case 1:
 						return '<li>Click on<i class="fa fa-bars"></i>to view all contacts.</li>'
 								  + '<li>Type in key words to search specific contacts; e.g Type in "NYU" to search all students going to NYU.</li>'
