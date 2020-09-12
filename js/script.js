@@ -1164,7 +1164,7 @@
 						return '<li>点击<i class="fa fa-bars"></i>可查看完整通讯录；</li>'
 								  + `<li>在搜索框里输入关键词，例如输入“${(curriculum == Curriculum.INTERNATIONAL)?"NYU":"中山大学"}”搜索所有在${(curriculum == Curriculum.INTERNATIONAL)?"NYU":"中山大学"}上学的同学；</li>`
 								  + `${(curriculum == Curriculum.INTERNATIONAL)?"<li>点击右下角按钮可以切换中文/英文；</li>":""}`
-								  + '<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向；</li>'
+								  + `${(curriculum == Curriculum.INTERNATIONAL)?'<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向；</li>':""}`
 								  + `${(curriculum == Curriculum.INTERNATIONAL)?"<li>(Gapping)/(Deferring)标签标注出了在2020-2021学年中选择Gap/Defer的同学；</li>":""}`
 								  + `<li>缩放地图可查看学校在所处城市中的精确定位，这在学校分布密集的城市尤有帮助，例如${(curriculum == Curriculum.INTERNATIONAL)?'美国东北部地区；</li>':'广东地区；'}`
 								  + '<li>本地图为不完全统计，个人信息以自愿为原则采集；</li>'
