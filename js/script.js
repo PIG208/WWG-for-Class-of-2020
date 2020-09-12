@@ -1171,7 +1171,8 @@
 								  + '<li>本地图为不完全统计，个人信息以自愿为原则采集；</li>'
 								  + `<li>如需更新个人信息（如${(curriculum == Curriculum.INTERNATIONAL)?"就读学校、休学状态":"手机号、就读专业"}），或者投诉与建议，请联系微信账号jychen630；</li>`;
 					case 1:
-						return '<li>Click on<i class="fa fa-bars"></i>to view all contacts.</li>'
+						return '<li class="text-danger">Sharing your login credentials with others is utterly PROHIBITED in order to maintain information security./li>'
+									+ '<li>Click on<i class="fa fa-bars"></i>to view all contacts.</li>'
 								  + '<li>Type in key words to search specific contacts; e.g Type in "NYU" to search all students going to NYU.</li>'
 								  + '<li>Click the "中/EN" button in the bottom right corner to switch languages.</li>'
 								  + '<li>Click on<i class="fa fa-map"></i>to view&nbsp<i>Where We Go 2020</i>&nbspstatic map and check where everyone goes to.</li>'
