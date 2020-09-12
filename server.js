@@ -75,9 +75,8 @@ app.get('/getVerificationCode', (req, res) => {
 	const reqParams = {
 		method:'POST'
 	};
-	console.log(params);
 	client.request('SendSms', params, reqParams).then((result) => {
-		console.log(JSON.stringify(result));
+		console.log("Sending sms with params: ", params);
 		res.send(result.Message);
 	}, (ex) => {
 		console.log(ex);
@@ -88,6 +87,7 @@ app.get('/getVerificationCode', (req, res) => {
 
 // For new user to sign up (user info need to exist already in the database)
 app.get('/signup', (req, res) => {
+	console.log(`[Signup] ${req.query.phoneNum} signing up`)
 	const passwordSha = req.query.passwordSha;
 	const phoneNum = req.query.phoneNum;
 
@@ -121,8 +121,7 @@ app.get('/checkPhoneNum', (req, res) => {
 		lookupPhoneNum(req.query.phoneNum, function(err, results){
 			if(err) console.log(err);
 			if(results != undefined && results.length > 0){
-				console.log(results[0].password_hash);
-				if(results[0].password_hash != null){
+				if(results[0].password_hash != ""){
 					res.send('2');
 				}
 				else {
@@ -154,6 +153,17 @@ app.get('/login', (req, res) => {
 	});
 });
 
+app.get('/getMapList', (req, res) => {
+	validateLogin(req.query.phoneNum, req.query.passwordSha, function(statusCode){
+		if(statusCode == 0){
+
+		}
+		else {
+			res.status(403).end('Unauthorized /GET request');
+		}
+	});
+});
+
 app.get('/maps/*', (req, res) => {
 	validateLogin(req.query.phoneNum, req.query.passwordSha, function(statusCode){
 		if(statusCode == 0){
@@ -165,7 +175,6 @@ app.get('/maps/*', (req, res) => {
 				console.log(e);
 				res.status(404).send('Invalid url');
 			}
-			console.log("ori", req, req.originalUrl.match(/maps\/(.+)(\?)?/)[1]);
 
 		}
 		else{
