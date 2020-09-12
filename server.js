@@ -87,7 +87,7 @@ app.get('/getVerificationCode', (req, res) => {
 
 // For new user to sign up (user info need to exist already in the database)
 app.get('/signup', (req, res) => {
-	console.log(`[Signup] ${req.query.phoneNum} signing up`)
+	console.log(`[Signup] ${new Date().toLocaleString()} ${req.query.phoneNum} signing up`)
 	const passwordSha = req.query.passwordSha;
 	const phoneNum = req.query.phoneNum;
 
@@ -140,6 +140,7 @@ app.get('/checkPhoneNum', (req, res) => {
 
 // Check login credentials
 app.get('/login', (req, res) => {
+	console.log(`[Login] ${new Date().toLocaleString()} ${req.query.phoneNum} logging in`);
 	validateLogin(req.query.phoneNum, req.query.passwordSha, function(statusCode){
 		if(statusCode == 0){
 			sendCsvForCurriculum(req.query.phoneNum, res);
