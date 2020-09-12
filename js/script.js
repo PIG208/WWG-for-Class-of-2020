@@ -71,7 +71,6 @@
 							url: URL_GET_CODE,
 							data: param,
 							success: function(result) {
-								//console.log(result);
 							}
 						});
 						var smsInterval = setInterval(function(e){
@@ -484,7 +483,6 @@
 			else {
 				element.find('h5').text(FeatureText.name(feature));
 			}
-			console.log(element);
 			element.find('span').get(0).innerHTML = FeatureText.countryRegion(feature);
 			element.find('span').get(1).innerHTML = FeatureText.region(feature);
 			element.find('span').get(2).innerHTML = FeatureText.city(feature);
