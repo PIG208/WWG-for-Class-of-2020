@@ -292,6 +292,7 @@
 				}, function (err, data) {
 					map.on('load', function () {
 						var info = data.features.shift().properties.NameCN;
+						$('#helper-msg')[0].innerHTML = FeatureText.helperMsg();
 						langRefresh();
 						if(info == 'gaokao'){
 							map.setZoom(2);
@@ -1167,7 +1168,7 @@
 								  + `${(curriculum == Curriculum.INTERNATIONAL)?"<li>点击右下角按钮可以切换中文/英文；</li>":""}`
 								  + '<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向；</li>'
 								  + `${(curriculum == Curriculum.INTERNATIONAL)?"<li>(Gapping)/(Deferring)标签标注出了在2020-2021学年中选择Gap/Defer的同学；</li>":""}`
-								  + `<li>缩放地图可查看学校在所处城市中的精确定位，这在学校分布密集的城市尤有帮助，例如${(curriculum == Curriculum.INTERNATIONAL)?'美国东北部地区；</li>':'广东地区'}`
+								  + `<li>缩放地图可查看学校在所处城市中的精确定位，这在学校分布密集的城市尤有帮助，例如${(curriculum == Curriculum.INTERNATIONAL)?'美国东北部地区；</li>':'广东地区；'}`
 								  + '<li>本地图为不完全统计，个人信息以自愿为原则采集；</li>'
 								  + `<li>如需更新个人信息（如${(curriculum == Curriculum.INTERNATIONAL)?"就读学校、休学状态":"手机号、就读专业"}），或者投诉与建议，请联系微信账号jychen630；</li>`;
 					case 1:
