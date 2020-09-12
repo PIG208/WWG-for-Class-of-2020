@@ -121,7 +121,8 @@ app.get('/checkPhoneNum', (req, res) => {
 		lookupPhoneNum(req.query.phoneNum, function(err, results){
 			if(err) console.log(err);
 			if(results != undefined && results.length > 0){
-				if(results[0].password_hash != ""){
+				console.log("paswordHash:", results[0]);
+				if(results[0].password_hash != null){
 					res.send('2');
 				}
 				else {
@@ -208,7 +209,7 @@ function validateLogin(phoneNum, passwordSha, callback){
 
 // Lookup the table user_credentials for the phone number
 function lookupPhoneNum(phoneNum, callback) {
-	conn.query(`SELECT phone_num FROM user_credentials WHERE phone_num="${phoneNum}"`, callback);
+	conn.query(`SELECT phone_num, password_hash FROM user_credentials WHERE phone_num="${phoneNum}"`, callback);
 }
 
 // general password reset method that requires a verificationCode and the corresponding phone number
