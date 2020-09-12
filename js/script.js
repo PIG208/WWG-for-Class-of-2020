@@ -1161,7 +1161,8 @@
 			static helperMsg() {
 				switch(lang){
 					case 0:
-						return '<li>点击<i class="fa fa-bars"></i>可查看完整通讯录；</li>'
+						return '<li class="text-danger">为保障信息安全及所有在册学生的隐私，禁止向任何人泄露您的个人账号和密码。</li>'
+									+ '<li>点击<i class="fa fa-bars"></i>可查看完整通讯录；</li>'
 								  + `<li>在搜索框里输入关键词，例如输入“${(curriculum == Curriculum.INTERNATIONAL)?"NYU":"中山大学"}”搜索所有在${(curriculum == Curriculum.INTERNATIONAL)?"NYU":"中山大学"}上学的同学；</li>`
 								  + `${(curriculum == Curriculum.INTERNATIONAL)?"<li>点击右下角按钮可以切换中文/英文；</li>":""}`
 								  + `${(curriculum == Curriculum.INTERNATIONAL)?'<li>点击<i class="fa fa-map"></i>查看<i>Where We Go 2020</i>&nbsp静态地图，查看同学们的毕业去向；</li>':""}`
