@@ -375,6 +375,7 @@
 				+	'<li><i class="fa fa-map"></i><span></span></li>'
 				+	'<li><i class="fa fa-building"></i><span></span></li>'
 				+ '<li><i class="fa fa-university"></i><span></span></li>'
+				+ '<li><i class="fa fa-graduation-cap"></i><span></span></li>'
 				+ '<li><i class="fa fa-book"></i><span></span></li>'
 				+ '<li><i class="fa fa-phone"></i><span></span></li>'
 				+ '<li><i class="fa fa-wechat"></i><span></span></li>'
@@ -487,10 +488,11 @@
 			element.find('span').get(1).innerHTML = FeatureText.region(feature);
 			element.find('span').get(2).innerHTML = FeatureText.city(feature);
 			element.find('span').get(3).innerHTML = FeatureText.school(feature);
-			element.find('span').get(4).innerHTML = FeatureText.major(feature);
-			element.find('span').get(5).innerHTML = FeatureText.phone(feature);
-			element.find('span').get(6).innerHTML = FeatureText.wechat(feature);
-			element.find('span').get(7).innerHTML = FeatureText.class_(feature);
+			element.find('span').get(4).innerHTML = FeatureText.department(feature);
+			element.find('span').get(5).innerHTML = FeatureText.major(feature);
+			element.find('span').get(6).innerHTML = FeatureText.phone(feature);
+			element.find('span').get(7).innerHTML = FeatureText.wechat(feature);
+			element.find('span').get(8).innerHTML = FeatureText.class_(feature);
 			element.find('li').each((i, e) => {
 				if ($(e).find('span').text().trim() == '') {
 					$(e).hide();
@@ -1048,6 +1050,13 @@
 					case 1:
 						return feature.properties.MajorEN;
 				}
+			}
+
+			static department(feature) {
+				if(curriculum == Curriculum.GAOKAO){
+					return feature.properties.SchoolLong;
+				}
+				return "";
 			}
 
 			static countryRegion(feature) {

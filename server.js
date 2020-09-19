@@ -29,8 +29,9 @@ function dbConnect(){
 	});
 
 	conn.on('error', function(err){
-		console.log('db error:' + err.code);
+		console.log(`[${new Date().toLocaleString()}] [Database] ${err.code}`);
 		if(err.code == 'PROTOCOL_CONNECTION_LOST'){
+			console.log(`[${new Date().toLocaleString()}] [Database] reconnecting`);
 			dbConnect();
 		}
 		else {
@@ -76,7 +77,7 @@ app.get('/getVerificationCode', (req, res) => {
 		method:'POST'
 	};
 	client.request('SendSms', params, reqParams).then((result) => {
-		console.log("Sending sms with params: ", params);
+		console.log(`[${new Date().toLocaleString()}] [Verification] Sending verification to ${req.query.phoneNum}`);
 		res.send(result.Message);
 	}, (ex) => {
 		console.log(ex);
@@ -87,12 +88,12 @@ app.get('/getVerificationCode', (req, res) => {
 
 // For new user to sign up (user info need to exist already in the database)
 app.get('/signup', (req, res) => {
-	console.log(`[Signup] ${new Date().toLocaleString()} ${req.query.phoneNum} signing up`)
+	console.log(`[${new Date().toLocaleString()}] [Signup] ${req.query.phoneNum} signing up`)
 	const passwordSha = req.query.passwordSha;
 	const phoneNum = req.query.phoneNum;
 
 	if(!validatePhoneNum(phoneNum)){
-		console.log(`${phoneNum} is invalid!`);
+		console.log(`[${new Date().toLocaleString()}] [Signup] ${req.query.phoneNum} uses invalid phonenum`)
 		res.send('1invalid phone number.');
 		return;
 	}
@@ -103,6 +104,7 @@ app.get('/signup', (req, res) => {
 			if(err) console.log(err);
 			if(results.affectedRows > 0){
 				sendCsvForCurriculum(phoneNum, res);
+					console.log(`[${new Date().toLocaleString()}] [Signup] ${req.query.phoneNum} signed up`)
 			}
 			else{
 				res.send('1invalid phone number.');
@@ -121,7 +123,6 @@ app.get('/checkPhoneNum', (req, res) => {
 		lookupPhoneNum(req.query.phoneNum, function(err, results){
 			if(err) console.log(err);
 			if(results != undefined && results.length > 0){
-				console.log("paswordHash:", results[0]);
 				if(results[0].password_hash != null){
 					res.send('2');
 				}
@@ -141,15 +142,18 @@ app.get('/checkPhoneNum', (req, res) => {
 
 // Check login credentials
 app.get('/login', (req, res) => {
-	console.log(`[Login] ${new Date().toLocaleString()} ${req.query.phoneNum} logging in`);
+	console.log(`[${new Date().toLocaleString()}] [Login] ${req.query.phoneNum} logging in`);
 	validateLogin(req.query.phoneNum, req.query.passwordSha, function(statusCode){
 		if(statusCode == 0){
+			console.log(`[${new Date().toLocaleString()}] [Login] ${req.query.phoneNum} logged in`);
 			sendCsvForCurriculum(req.query.phoneNum, res);
 		}
 		else if(statusCode == 1){
+			console.log(`[${new Date().toLocaleString()}] [Login] ${req.query.phoneNum} uses invalid phonenum`);
 			res.send('1Invalid phone number');
 		}
 		else if(statusCode == 3){
+			console.log(`[${new Date().toLocaleString()}] [Login] ${req.query.phoneNum} enters wrong phonenum/password`);
 			res.send('3Wrong phone number or password.');
 		}
 	});
@@ -233,7 +237,7 @@ function sendCsvForCurriculum(phoneNum, res){
 	});
 }
 
-console.log('Start listening on', hostname + ':' + port);
+console.log(`[${new Date().toLocaleString()}] [Server] Start listening on ${hostname} ${port}`);
 
 app.use(express.static(path.join(__dirname, 'js')));
 app.use(express.static(path.join(__dirname, 'css')));
