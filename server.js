@@ -218,7 +218,7 @@ app.get('/maps/*', (req, res) => {
 
 // Return false if the phone number is invalid
 function validatePhoneNum(phoneNum){
-	return phoneNum.match(/[1][0-9]+/)[0].length == phoneNum.length;
+	return phoneNum.match(/[1][0-9]+/).length > 0 && phoneNum.match(/[1][0-9]+/)[0].length == phoneNum.length;
 }
 
 // Return status code for login
