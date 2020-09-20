@@ -70,12 +70,15 @@
 			$('#btn-send-sms-reset').click(function(e){
 				e.preventDefault();
 				phoneNumLookup($('#input-phone-number-reset').val().trim(), function(status){
-					if(status == '1'){
+					if($('#input-phone-number-reset').val().trim()[0] != '1'){
+						showError('该账号不能被重置密码。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630', '#reset');
+					}
+					else if(status == '1'){
 						showError('该电话号码未被白名单收录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630', '#reset');
 						return;
 					}
 					else if(status != '2'){
-						showError('该电话号码已注册！请直接登录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630', '#reset');
+						showError('该电话号码未注册！请注册。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630', '#reset');
 						return;
 					}
 					else{
@@ -214,7 +217,7 @@
 			// Lookup the phone number in the database and gives true to the callback if the phone number is valid.
 			function phoneNumLookup(phoneNum, callback){
 				if(!validatePhoneNum(phoneNum)){
-					showError('请正确输入电话号码');
+					callback(4)
 				}
 				else{
 					param = {
@@ -273,6 +276,9 @@
 					if(status == '2' && $('#form-signup').hasClass('show')){
 						showError('该电话号码已注册！请直接登录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630');
 					}
+					if(status == '4'){
+						showError('请正确输入电话号码！');
+					}
 				});
 			});
 
@@ -281,9 +287,13 @@
 					if(status == '1'){
 						showError('该电话号码未被白名单收录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630', '#reset');
 					}
+					else if(status == '4'){
+						showError('请正确输入电话号码！', '#reset');
+					}
 					else if(status != '2'){
 						showError('该电话号码未注册！请先注册。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630', '#reset');
 					}
+
 				});
 			});
 
@@ -294,6 +304,9 @@
 					}
 					if(url == URL_SIGNUP && status == '2'){
 						showError('该电话号码已注册！请直接登录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630');
+					}
+					if(status == '4'){
+						showError('请正确输入电话号码！');
 					}
 					// When the callback status is 2 (user already exists), the url needs to be URL_LOGIN to make sure that the ajax request will be sent
 					if(status != '1' && (url == URL_LOGIN || status != '2')){
