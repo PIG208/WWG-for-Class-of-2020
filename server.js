@@ -80,8 +80,10 @@ app.get('/getVerificationCode', (req, res) => {
 		console.log(`[${new Date().toLocaleString()}] [Verification] Sending verification to ${req.query.phoneNum}`);
 		res.send(result.Message);
 	}, (ex) => {
+		console.log(`[${new Date().toLocaleString()}] [Error] Failed to send msg to ${req.query.phoneNum}`);
 		console.log(ex);
-		res.send(result.Message);
+		console.log(`[${new Date().toLocaleString()}] [Error] ===================================================`);
+		res.send('1invalid phone number.');
 	});
 	verificationCodeTemp[req.query.phoneNum] = code
 });
@@ -216,7 +218,7 @@ app.get('/maps/*', (req, res) => {
 
 // Return false if the phone number is invalid
 function validatePhoneNum(phoneNum){
-	return phoneNum.match(/[1-9][0-9]+/)[0].length == phoneNum.length;
+	return phoneNum.match(/1[0-9]+/)[0].length == phoneNum.length;
 }
 
 // Return status code for login
