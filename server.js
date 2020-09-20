@@ -88,23 +88,23 @@ app.get('/getVerificationCode', (req, res) => {
 
 // For new user to sign up (user info need to exist already in the database)
 app.get('/signup', (req, res) => {
-	console.log(`[${new Date().toLocaleString()}] [Signup] ${req.query.phoneNum} signing up`)
-	const passwordSha = req.query.passwordSha;
+	console.log(`[${new Date().toLocaleString()}] [Signup] ${req.query.phoneNum} signing up`);
 	const phoneNum = req.query.phoneNum;
+	const passwordSha = req.query.passwordSha;
 
 	if(!validatePhoneNum(phoneNum)){
-		console.log(`[${new Date().toLocaleString()}] [Signup] ${req.query.phoneNum} uses invalid phonenum`)
+		console.log(`[${new Date().toLocaleString()}] [Signup] ${req.query.phoneNum} uses invalid phonenum`);
 		res.send('1invalid phone number.');
 		return;
 	}
 
-	if(req.query.verificationCode == verificationCodeTemp[phoneNum]){
+	if(verificationCodeTemp[phoneNum] != undefined && req.query.verificationCode == verificationCodeTemp[phoneNum]){
 		verificationCodeTemp[phoneNum] = undefined;
 		setPassword(passwordSha, phoneNum, function(err, results){
 			if(err) console.log(err);
 			if(results.affectedRows > 0){
 				sendCsvForCurriculum(phoneNum, res);
-					console.log(`[${new Date().toLocaleString()}] [Signup] ${req.query.phoneNum} signed up`)
+					console.log(`[${new Date().toLocaleString()}] [Signup] ${req.query.phoneNum} signed up`);
 			}
 			else{
 				res.send('1invalid phone number.');
@@ -157,6 +157,31 @@ app.get('/login', (req, res) => {
 			res.send('3Wrong phone number or password.');
 		}
 	});
+});
+
+app.get('/resetPassword', (req, res) => {
+	const phoneNum = req.query.phoneNum;
+	const passwordSha = req.query.passwordSha;
+		console.log(`[${new Date().toLocaleString()}] [Reset] ${req.query.phoneNum} resetting password`);
+
+	if(validatePhoneNum(phoneNum)){
+		if(verificationCodeTemp[phoneNum] != undefined && verificationCodeTemp[phoneNum] == req.query.verificationCode){
+			verificationCodeTemp[phoneNum] = undefined;
+			setPassword(passwordSha, phoneNum, function(err, results){
+				if(err) console.log(err);
+				if(results.affectedRows > 0){
+					console.log(`[${new Date().toLocaleString()}] [Reset] ${req.query.phoneNum} reset password`);
+					res.send('0OK');
+				}
+				else{
+					res.send('1invalid phone number.');
+				}
+			});
+		}
+	}
+	else {
+		res.send('1Invalid phonenum');
+	}
 });
 
 app.get('/getMapList', (req, res) => {

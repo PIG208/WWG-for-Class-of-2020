@@ -55,7 +55,7 @@
 		<div class="modal-dialog modal-md">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title">身份验证</h5>
+					<h5 class="modal-title">登录</h5>
 				</div>
 				<div class="modal-body">
 					<form id="form-signup" class="collapse multi-collapse">
@@ -99,6 +99,7 @@
             <br />只有在白名单内的用户才可以访问相关信息
             <br />问卷中未填写手机号的同学请联系<i class="fa fa-wechat"></i>jychen630
           </p>
+          <button id="btn-toggle-reset" class="btn btn-primary" data-target="#reset" data-toggle="modal">忘记密码</button>
 				</div>
 				<div class="modal-footer">
 					<button id="btn-toggle-verification" class="btn btn-info" data-toggle="collapse" onclick="
@@ -108,6 +109,44 @@
 			</div>
 		</div>
 	</div>
+  <div id="reset" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">重置密码</h5>
+        </div>
+        <div class="modal-body">
+          <div class="collapse multi-collapse show">
+						<div class="form-group">
+							<label for="input-phone-number-reset">电话号码</label>
+							<input id="input-phone-number-reset" type="text" autocomplete="username" class="form-control" placeholder="输入电话号码" />
+						</div>
+						<div class="form-group">
+							<label for="input-verification-code-reset">验证码</label>
+							<div class="input-group">
+								<input id="input-verification-code-reset" type="text" class="form-control" placeholder="手机上收到的验证码"></input>
+								<div class="input-group-append">
+									<button id="btn-send-sms-reset" class="btn btn-primary">发送验证码</button>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="input-password-reset">新密码</label>
+							<input id="input-password-reset" type="password" autocomplete="current-password" class="form-control" placeholder="输入密码，长度不限"></input>
+						</div>
+						<div class="form-group">
+							<label for="input-password-confirm-reset">确认密码</label>
+							<input id="input-password-confirm-reset" type="password" autocomplete="current-password" class="form-control" placeholder="再次输入密码"></input>
+						</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-dismiss="modal">取消</button>
+          <button id="btn-reset" class="btn btn-primary">重置密码</button>
+        </div>
+      </div>
+    </div>
+  </div>
 	<div id="card-info" class="modal fade" role="dialog">
 		<div id="modal-popup" class="modal-dialog modal-md modal-dialog-centered">
 			<div class="modal-content card card-modal">

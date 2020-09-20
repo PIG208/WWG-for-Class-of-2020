@@ -21,7 +21,7 @@
 		Curriculum.GAOKAO = 0;
 		Curriculum.INTERNATIONAL = 1;
 		var curriculum;
-		const URL_LOGIN = '/login', URL_SIGNUP = '/signup', URL_CHECK_PHONE_NUM = '/checkPhoneNum', URL_GET_CODE = '/getVerificationCode';
+		const URL_LOGIN = '/login', URL_SIGNUP = '/signup', URL_CHECK_PHONE_NUM = '/checkPhoneNum', URL_GET_CODE = '/getVerificationCode', URL_RESET = '/resetPassword';
 
 		$(document).ready(function () {
 
@@ -42,9 +42,11 @@
 			$('#btn-toggle-verification').click(function (e){
 				if($('#form-signup').hasClass('show')){
 					$('#btn-toggle-verification').text('去注册');
+					$('#btn-toggle-reset').show();
 				}
 				else{
 					$('#btn-toggle-verification').text('去登录');
+					$('#btn-toggle-reset').hide();
 				}
 			});
 
@@ -60,36 +62,109 @@
 						return;
 					}
 					if(status == 0){
-						var countDown = 60;
-						$('#btn-send-sms')[0].disabled = true;
-						$('#btn-send-sms').text(`发送验证码(${countDown--})`);
-						param = {
-							phoneNum: $('#input-phone-number-signup').val()
-						}
-						$.ajax({
-							type: 'GET',
-							url: URL_GET_CODE,
-							data: param,
-							success: function(result) {
-							}
-						});
-						var smsInterval = setInterval(function(e){
-							if(countDown > 0){
-								$('#btn-send-sms').text(`发送验证码(${countDown})`);
-								countDown--;
-							}
-							else {
-								$('#btn-send-sms')[0].disabled = false;
-								$('#btn-send-sms').text('发送验证码');
-								clearInterval(smsInterval);
-							}
-						}, 1000);
+						sendSms(e.target, $('#input-phone-number-signup').val());
 					}
 				});
 			});
 
+			$('#btn-send-sms-reset').click(function(e){
+				e.preventDefault();
+				phoneNumLookup($('#input-phone-number-reset').val().trim(), function(status){
+					if(status == '1'){
+						showError('该电话号码未被白名单收录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630', '#reset');
+						return;
+					}
+					else if(status != '2'){
+						showError('该电话号码已注册！请直接登录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630', '#reset');
+						return;
+					}
+					else{
+						sendSms(e.target, $('#input-phone-number-reset').val());
+					}
+				});
+			});
+
+			$('#btn-reset').click(function(e){
+				e.preventDefault();
+				if(validateForm){
+					var param = {
+						phoneNum: $('#input-phone-number-reset').val().trim(),
+						passwordSha: sha256($('#input-password-reset').val()),
+						verificationCode: $('#input-verification-code-reset').val().trim()
+					}
+					$.ajax({
+						type: 'GET',
+						url: URL_RESET,
+						data: param,
+						dataType: 'text',
+						success: function(result){
+							if(result.substr(0, 1) == '1'){
+								showError('请正确输入电话号码', '#reset');
+							}
+							else if(result.substr(0, 1) == '2'){
+								showError('验证码错误', '#reset');
+							}
+							else {
+								$('#reset').modal('hide');
+							}
+						}
+					});
+				}
+			});
+
+			function sendSms(obj, phoneNum){
+				var countDown = 60;
+				obj.disabled = true;
+				$(obj).text(`发送验证码(${countDown--})`);
+				var param = {
+					phoneNum: phoneNum
+				}
+				$.ajax({
+					type: 'GET',
+					url: URL_GET_CODE,
+					data: param,
+					success: function(result) {
+					}
+				});
+				var smsInterval = setInterval(function(e){
+					if(countDown > 0){
+						$(obj).text(`发送验证码(${countDown})`);
+						countDown--;
+					}
+					else {
+						obj.disabled = false;
+						$(obj).text('发送验证码');
+						clearInterval(smsInterval);
+					}
+				}, 1000);
+			}
+
 			function validateForm(){
-				if($('#form-signup').hasClass('show')){
+				if($('#reset').hasClass('show')){
+					if($('#input-phone-number-reset').val().trim() == ''){
+						showError('请输入电话号码', '#reset');
+					}
+					else if(!validatePhoneNum($('#input-phone-number-reset').val().trim())){
+						showError('请正确输入电话号码', '#reset');
+					}
+					else if($('#input-password-reset').val() == ''){
+						showError('请输入密码', '#reset');
+					}
+					else if($('#input-password-confirm-reset').val() == ''){
+						showError('请再次输入密码', '#reset');
+					}
+					else if($('#input-password-reset').val() != $('#input-password-confirm-reset').val()){
+						showError('两次输入密码不一致', '#reset');
+					}
+					else if($('#input-verification-code-reset').val() == ''){
+						showError('请输入验证码', '#reset');
+					}
+					else {
+						showError('', '#reset');
+						return true;
+					}
+				}
+				else if($('#form-signup').hasClass('show')){
 					if($('#input-phone-number-signup').val().trim() == ''){
 						showError('请输入电话号码');
 					}
@@ -201,6 +276,17 @@
 				});
 			});
 
+			$('#input-phone-number-reset').blur(function (e){
+				phoneNumLookup($('#input-phone-number-reset').val().trim(), function(status){
+					if(status == '1'){
+						showError('该电话号码未被白名单收录。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630', '#reset');
+					}
+					else if(status != '2'){
+						showError('该电话号码未注册！请先注册。<br />如需帮助，请联系<i class="fa fa-wechat" style="color:#28a745"></i>jychen630', '#reset');
+					}
+				});
+			});
+
 			function ajaxVerify(url, param){
 				phoneNumLookup(param.phoneNum, function(status){
 					if(status == '1'){
@@ -260,11 +346,11 @@
 				});
 			}
 
-			function showError(msgHTML){
-				$('#msg-wrong').remove();
+			function showError(msgHTML, target='#verification'){
+				$(`#${target.replace(/[\.#]/, '')}.msg-wrong`).remove();
 				if(msgHTML != ''){
-					$('#verification').find('.modal-body').prepend(`<p id="msg-wrong">${msgHTML}</p>`);
-					$('#msg-wrong').animate({ 'opacity': 1 }, 500);
+					$(target).find('.modal-body').prepend(`<p id="${target.replace(/[\.#]/, '')}" class="msg-wrong">${msgHTML}</p>`);
+					$(`#${target.replace(/[\.#]/, '')}.msg-wrong`).animate({ 'opacity': 1 }, 500);
 				}
 			}
 
